@@ -16,9 +16,9 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 
-// Declaring a WebServlet called StarsServlet, which maps to url "/api/stars"
-@WebServlet(name = "StarsServlet", urlPatterns = "/api/stars")
-public class StarsServlet extends HttpServlet {
+// Declaring a WebServlet called StarsServlet, which maps to url "/api/movies"
+@WebServlet(name = "MoviesServlet", urlPatterns = "/api/movies")
+public class MoviesServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     // Create a dataSource which registered in web.
@@ -26,7 +26,7 @@ public class StarsServlet extends HttpServlet {
 
     public void init(ServletConfig config) {
         try {
-            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedbexample");
+            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
         } catch (NamingException e) {
             e.printStackTrace();
         }
@@ -48,7 +48,19 @@ public class StarsServlet extends HttpServlet {
             // Declare our statement
             Statement statement = conn.createStatement();
 
-            String query = "SELECT * from stars";
+            String query = "SELECT m.title, m.year, m.director, MAX(r.rating) AS rating, " +
+                    "GROUP_CONCAT(DISTINCT g.name ORDER BY g.id SEPARATOR ', ') AS genres, " +
+                    "SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT s.name ORDER BY s.id SEPARATOR ', '), ',', 3) AS stars " +
+                    "FROM movies AS m " +
+                    "INNER JOIN ratings AS r ON m.id = r.movieId " +
+                    "INNER JOIN genres_in_movies AS gm ON m.id = gm.movieId " +
+                    "INNER JOIN genres AS g ON gm.genreId = g.id " +
+                    "INNER JOIN stars_in_movies AS sm ON m.id = sm.movieId " +
+                    "INNER JOIN stars AS s ON sm.starId = s.id " +
+                    "GROUP BY m.id, m.title, m.year, m.director " +
+                    "ORDER BY MAX(r.rating) DESC " +
+                    "LIMIT 20;";
+
 
             // Perform the query
             ResultSet rs = statement.executeQuery(query);
@@ -57,15 +69,21 @@ public class StarsServlet extends HttpServlet {
 
             // Iterate through each row of rs
             while (rs.next()) {
-                String star_id = rs.getString("id");
-                String star_name = rs.getString("name");
-                String star_dob = rs.getString("birthYear");
+                String title = rs.getString("title");
+                int year = rs.getInt("year");
+                String director = rs.getString("director");
+                double rating = rs.getDouble("rating");
+                String genres = rs.getString("genres");
+                String stars = rs.getString("stars");
 
                 // Create a JsonObject based on the data we retrieve from rs
                 JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("star_id", star_id);
-                jsonObject.addProperty("star_name", star_name);
-                jsonObject.addProperty("star_dob", star_dob);
+                jsonObject.addProperty("title", title);
+                jsonObject.addProperty("year", year);
+                jsonObject.addProperty("director", director);
+                jsonObject.addProperty("rating", rating);
+                jsonObject.addProperty("genres", genres);
+                jsonObject.addProperty("stars", stars);
 
                 jsonArray.add(jsonObject);
             }
