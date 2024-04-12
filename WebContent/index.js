@@ -23,9 +23,9 @@ function handleMovieResult(resultData) {
         // Add a link to single-star.html with id passed with GET url parameter
         rowHTML += "<td>";
         for (let j = 0; j < Math.min(3, resultData[i]["stars"].length); j++) {
-            rowHTML += '<a href="single-star.html?id=' + resultData[i]["stars"][j]["id"] + '">'
-                + resultData[i]["stars"][j]["name"] + ', '     // display star name
-                '</a>';
+            rowHTML += '<a href="single-star.html?id=' + resultData[i]["stars"][j]["id"] + '">' +
+                        resultData[i]["stars"][j]["name"] + ', ' +
+                        '</a>';
         }
         rowHTML += "</td>";
 
