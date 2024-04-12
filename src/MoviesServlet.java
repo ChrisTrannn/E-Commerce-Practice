@@ -48,9 +48,10 @@ public class MoviesServlet extends HttpServlet {
             // Declare our statement
             Statement statement = conn.createStatement();
 
-            String query = "SELECT m.title, m.year, m.director, MAX(r.rating) AS rating, " +
+            String query =
+                    "SELECT m.id AS movie_id, m.title, m.year, m.director, MAX(r.rating) AS rating, " +
                     "GROUP_CONCAT(DISTINCT g.name ORDER BY g.id SEPARATOR ', ') AS genres, " +
-                    "SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT s.name ORDER BY s.id SEPARATOR ', '), ',', 3) AS stars " +
+                    "GROUP_CONCAT(DISTINCT CONCAT(s.id, ':', s.name) ORDER BY s.id SEPARATOR ', ') AS stars " +
                     "FROM movies AS m " +
                     "INNER JOIN ratings AS r ON m.id = r.movieId " +
                     "INNER JOIN genres_in_movies AS gm ON m.id = gm.movieId " +
@@ -72,18 +73,30 @@ public class MoviesServlet extends HttpServlet {
                 String title = rs.getString("title");
                 int year = rs.getInt("year");
                 String director = rs.getString("director");
-                double rating = rs.getDouble("rating");
                 String genres = rs.getString("genres");
                 String stars = rs.getString("stars");
+                double rating = rs.getDouble("rating");
+
+                // Split the stars result, create star objects, and add them to a stars array
+                String[] starArray = stars.split(", ");
+                JsonArray starsArray = new JsonArray();
+
+                for (String star: starArray) {
+                    String[] starInfo = star.split(":");
+                    JsonObject starObject = new JsonObject();
+                    starObject.addProperty("id", starInfo[0]);
+                    starObject.addProperty("name", starInfo[1]);
+                    starsArray.add(starObject);
+                }
 
                 // Create a JsonObject based on the data we retrieve from rs
                 JsonObject jsonObject = new JsonObject();
                 jsonObject.addProperty("title", title);
                 jsonObject.addProperty("year", year);
                 jsonObject.addProperty("director", director);
-                jsonObject.addProperty("rating", rating);
                 jsonObject.addProperty("genres", genres);
-                jsonObject.addProperty("stars", stars);
+                jsonObject.add("stars", starsArray);
+                jsonObject.addProperty("rating", rating);
 
                 jsonArray.add(jsonObject);
             }

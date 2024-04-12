@@ -4,8 +4,6 @@
  */
 function handleMovieResult(resultData) {
     console.log("handleMovieResult: populating movie table from resultData");
-    console.log('hit');
-    console.log(resultData);
 
     // Populate the movie table
     // Find the empty table body by id "movie_table_body"
@@ -20,10 +18,18 @@ function handleMovieResult(resultData) {
         rowHTML += "<td>" + resultData[i]["title"] + "</td>";
         rowHTML += "<td>" + resultData[i]["year"] + "</td>";
         rowHTML += "<td>" + resultData[i]["director"] + "</td>";
-        rowHTML += "<td>" + resultData[i]["rating"] + "</td>";
         rowHTML += "<td>" + resultData[i]["genres"] + "</td>";
-        rowHTML += "<td>" + resultData[i]["stars"] + "</td>";
 
+        // Add a link to single-star.html with id passed with GET url parameter
+        rowHTML += "<td>";
+        for (let j = 0; j < Math.min(3, resultData[i]["stars"].length); j++) {
+            rowHTML += '<a href="single-star.html?id=' + resultData[i]["stars"][j]["id"] + '">'
+                + resultData[i]["stars"][j]["name"] + ', '     // display star name
+                '</a>';
+        }
+        rowHTML += "</td>";
+
+        rowHTML += "<td>" + resultData[i]["rating"] + "</td>";
         rowHTML += "</tr>";
 
 
