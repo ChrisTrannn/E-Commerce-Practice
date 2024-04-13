@@ -37,45 +37,44 @@ function getParameterByName(target) {
  */
 
 function handleResult(resultData) {
-    console.log("handleResult: populating star info from resultData");
-    // change the title of the page to the star name
-    let starTitle = jQuery("#star_title");
-    starTitle.append(resultData[0]["star_name"]);
+    console.log("handleResult: populating movie info from resultData");
+    // change the title of the page to the movie name
+    let movieTitle = jQuery("#movie_title");
+    movieTitle.append(resultData[0]["title"]);
 
-    // populate the star info h3
-    // find the empty h3 body by id "star_info"
-    let starInfoElement = jQuery("#star_name");
+    // populate the movie info h3, find the empty h3 body by id "movie_info"
+    let movieInfoElement = jQuery("#movie_info");
 
-    let starInfoHTML = "<h3>" + resultData[0]["star_name"] + "</h3>"
-
-    // append two html <p> created to the h3 body, which will refresh the page
-    starInfoElement.append(starInfoHTML);
-
-    let starDobElement = jQuery("#star_dob");
-
-    let starDOB = resultData[0]["star_dob"] ? resultData[0]["star_dob"] : "n/a";
-    let finalDob = "<h4>Date Of Birth: " + starDOB + "</h4>";
-
-    starDobElement.append(finalDob);
+    // append movie title and birth year via template string
+    movieInfoElement.append(`<p>${resultData[0]["title"]} (${resultData[0]["year"]})</p>`);
 
     console.log("handleResult: populating movie table from resultData");
 
-    // Populate the star table, Find the empty table body by id "movie_table_body"
+    // Populate the movie table, Find the empty table body by id "movie_table_body"
     let movieTableBodyElement = jQuery("#movie_table_body");
 
-    // Concatenate the html tags with resultData jsonObject to create table rows
+    // Iterate through resultData
     for (let i = 0; i < resultData.length; i++) {
+        // Concatenate the HTML tags with resultData jsonObject
         let rowHTML = "";
         rowHTML += "<tr>";
+        rowHTML += "<td>" + resultData[i]["title"] + "</td>";
+        rowHTML += "<td>" + resultData[i]["year"] + "</td>";
+        rowHTML += "<td>" + resultData[i]["director"] + "</td>";
+        rowHTML += "<td>" + resultData[i]["genres"] + "</td>";
 
-        // Add a link to the movie
-        rowHTML += "<th><a href='single-movie.html?id=" + resultData[i]["movie_id"] + "'>" + resultData[i]["movie_title"] + "</a></th>";
-
-        rowHTML += "<th>" + resultData[i]["movie_year"] + "</th>";
-        rowHTML += "<th>" + resultData[i]["movie_director"] + "</th>";
+        // Add a link to single-star.html with id passed with GET url parameter
+        rowHTML += "<td>";
+        for (let j = 0; j < resultData[i]["stars"].length; j++) {
+            rowHTML += '<a href="single-star.html?id=' + resultData[i]["stars"][j]["id"] + '">' +
+                resultData[i]["stars"][j]["name"] + ', ' +
+                '</a>';
+        }
+        rowHTML += "</td>";
+        rowHTML += "<td>" + resultData[i]["rating"] + "</td>";
         rowHTML += "</tr>";
 
-        // Append the row created to the table body, which will refresh the page
+        // Append the row created to the table body
         movieTableBodyElement.append(rowHTML);
     }
 }
@@ -85,12 +84,12 @@ function handleResult(resultData) {
  */
 
 // Get id from URL
-let starId = getParameterByName('id');
+let movieId = getParameterByName('id');
 
 // Makes the HTTP GET request and registers on success callback function handleResult
 jQuery.ajax({
     dataType: "json",  // Setting return data type
     method: "GET",// Setting request method
-    url: "api/single-star?id=" + starId, // Setting request url, which is mapped by SingleStarServlet
-    success: (resultData) => handleResult(resultData) // Setting callback function to handle data returned successfully by the SingleStarServlet
+    url: "api/single-movie?id=" + movieId, // Setting request url, which is mapped by SingleMovieServlet
+    success: (resultData) => handleResult(resultData) // Setting callback function to handle data returned successfully by the SingleMovieServlet
 });
