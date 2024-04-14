@@ -48,20 +48,17 @@ public class MoviesServlet extends HttpServlet {
             // Declare our statement
             Statement statement = conn.createStatement();
 
-            String query =
-                    "SELECT m.id AS movie_id, m.title, m.year, m.director, MAX(r.rating) AS rating, " +
-                    "GROUP_CONCAT(DISTINCT g.name ORDER BY g.id SEPARATOR ', ') AS genres, " +
-                    "GROUP_CONCAT(DISTINCT CONCAT(s.id, ':', s.name) ORDER BY s.id SEPARATOR ', ') AS stars " +
+            String query = "SELECT m.id AS movie_id, m.title, m.year, m.director, r.rating AS rating, " +
+                    "(SELECT GROUP_CONCAT(DISTINCT g.name SEPARATOR ', ') FROM genres_in_movies AS gm " +
+                        "INNER JOIN genres AS g ON gm.genreId = g.id " +
+                        "WHERE gm.movieId = m.id) AS genres, " +
+                    "(SELECT GROUP_CONCAT(DISTINCT CONCAT(s.id, ':', s.name) SEPARATOR ', ') FROM " +
+                        "(SELECT starId FROM stars_in_movies WHERE movieId = m.id LIMIT 3 ) AS sm " +
+                            "INNER JOIN stars AS s ON sm.starId = s.id) AS stars " +
                     "FROM movies AS m " +
                     "INNER JOIN ratings AS r ON m.id = r.movieId " +
-                    "INNER JOIN genres_in_movies AS gm ON m.id = gm.movieId " +
-                    "INNER JOIN genres AS g ON gm.genreId = g.id " +
-                    "INNER JOIN stars_in_movies AS sm ON m.id = sm.movieId " +
-                    "INNER JOIN stars AS s ON sm.starId = s.id " +
-                    "GROUP BY m.id, m.title, m.year, m.director " +
-                    "ORDER BY MAX(r.rating) DESC " +
+                    "ORDER BY r.rating DESC " +
                     "LIMIT 20;";
-
 
             // Perform the query
             ResultSet rs = statement.executeQuery(query);
