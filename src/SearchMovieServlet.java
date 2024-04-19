@@ -14,12 +14,13 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Enumeration;
 
 
-// Declaring a WebServlet called StarsServlet, which maps to url "/api/movies"
-@WebServlet(name = "MoviesServlet", urlPatterns = "/api/movies")
-public class MoviesServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
+// Declaring a WebServlet called StarsServlet, which maps to url "/api/movies-search"
+@WebServlet(name = "SearchMovieServlet", urlPatterns = "/api/search")
+public class SearchMovieServlet extends HttpServlet {
+    private static final long serialVersionUID = 3L;
 
     // Create a dataSource which registered in web.
     private DataSource dataSource;
@@ -31,46 +32,76 @@ public class MoviesServlet extends HttpServlet {
             e.printStackTrace();
         }
     }
-
     /**
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         response.setContentType("application/json"); // Response mime type
+        // Getting the request URL
+        String requestUrl = request.getRequestURL().toString();
 
+        // Getting the query string
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            // Append the query string to the request URL
+            requestUrl += "?" + queryString;
+        }
+
+        System.out.println("Request URL: " + requestUrl);
         // Output stream to STDOUT
         PrintWriter out = response.getWriter();
 
         // Get a connection from dataSource and let resource manager close the connection after usage.
         try (Connection conn = dataSource.getConnection()) {
-
-            // Declare our statement
             Statement statement = conn.createStatement();
 
-            String query = "SELECT m.id AS movie_id, m.title, m.year, m.director, r.rating AS rating, " +
+            String title = java.net.URLDecoder.decode(request.getParameter("title"), "UTF-8");
+            String year = java.net.URLDecoder.decode(request.getParameter("year"), "UTF-8");
+            String director = java.net.URLDecoder.decode(request.getParameter("director"), "UTF-8");
+            String starName = java.net.URLDecoder.decode(request.getParameter("starName"), "UTF-8");
+
+            System.out.println(title);
+            System.out.println(year);
+            System.out.println(director);
+            System.out.println(starName);
+
+            String query = "SELECT DISTINCT m.id AS movie_id, m.title, m.year, m.director, r.rating AS rating, " +
                     "(SELECT GROUP_CONCAT(DISTINCT g.name SEPARATOR ', ') FROM genres_in_movies AS gm " +
-                        "INNER JOIN genres AS g ON gm.genreId = g.id " +
-                        "WHERE gm.movieId = m.id) AS genres, " +
+                    "INNER JOIN genres AS g ON gm.genreId = g.id " +
+                    "WHERE gm.movieId = m.id) AS genres, " +
                     "(SELECT GROUP_CONCAT(DISTINCT CONCAT(s.id, ':', s.name) SEPARATOR ', ') FROM " +
-                        "(SELECT starId FROM stars_in_movies WHERE movieId = m.id LIMIT 3 ) AS sm " +
-                            "INNER JOIN stars AS s ON sm.starId = s.id) AS stars " +
+                    "(SELECT starId FROM stars_in_movies WHERE movieId = m.id LIMIT 3 ) AS sm " +
+                    "INNER JOIN stars AS s ON sm.starId = s.id) AS stars " +
                     "FROM movies AS m " +
                     "INNER JOIN ratings AS r ON m.id = r.movieId " +
-                    "ORDER BY r.rating DESC " +
-                    "LIMIT 20;";
+                    "LEFT JOIN stars_in_movies AS sim ON m.id = sim.movieId " +
+                    "LEFT JOIN stars AS s ON sim.starId = s.id " +
+                    "WHERE 1=1";
 
+            if (title != null && !title.isEmpty()) {
+                query += " AND m.title LIKE '%" + title + "%'";
+            }
+            if (year != null && !year.isEmpty()) {
+                query += " AND m.year = " + year;
+            }
+            if (director != null && !director.isEmpty()) {
+                query += " AND m.director LIKE '%" + director + "%'";
+            }
+            if (starName != null && !starName.isEmpty()) {
+                query += " AND s.name LIKE '%" + starName + "%'";
+            }
+
+            query += ";";
+
+            System.out.println(query);
             // Perform the query
             ResultSet rs = statement.executeQuery(query);
 
             JsonArray jsonArray = new JsonArray();
 
-            // Iterate through each row of rs
             while (rs.next()) {
                 String movieId = rs.getString("movie_id");
-                String title = rs.getString("title");
-                int year = rs.getInt("year");
-                String director = rs.getString("director");
                 String genres = rs.getString("genres");
                 String stars = rs.getString("stars");
                 double rating = rs.getDouble("rating");
@@ -90,9 +121,9 @@ public class MoviesServlet extends HttpServlet {
                 // Create a JsonObject based on the data we retrieve from rs
                 JsonObject jsonObject = new JsonObject();
                 jsonObject.addProperty("movie_id", movieId);
-                jsonObject.addProperty("title", title);
-                jsonObject.addProperty("year", year);
-                jsonObject.addProperty("director", director);
+                jsonObject.addProperty("title", rs.getString("title"));
+                jsonObject.addProperty("year", rs.getString("year"));
+                jsonObject.addProperty("director", rs.getString("director"));
                 jsonObject.addProperty("genres", genres);
                 jsonObject.add("stars", starsArray);
                 jsonObject.addProperty("rating", rating);
@@ -109,12 +140,12 @@ public class MoviesServlet extends HttpServlet {
             out.write(jsonArray.toString());
             // Set response status to 200 (OK)
             response.setStatus(200);
-
-        } catch (Exception e) {
+        }  catch (Exception e) {
 
             // Write error message JSON object to output
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("errorMessage", e.getMessage());
+
             out.write(jsonObject.toString());
 
             // Set response status to 500 (Internal Server Error)
@@ -127,3 +158,32 @@ public class MoviesServlet extends HttpServlet {
 
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
