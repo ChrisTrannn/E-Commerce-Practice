@@ -4,6 +4,7 @@
  */
 function handleMovieResult(resultData) {
     console.log("handleMovieResult: populating movie table from resultData");
+    console.log(resultData)
 
     // Populate the movie table, Find the empty table body by id "movie_table_body"
     let movieTableBodyElement = jQuery("#movie_table_body");
@@ -36,15 +37,33 @@ function handleMovieResult(resultData) {
         movieTableBodyElement.append(rowHTML);
     }
 }
+// Function to parse query parameters from URL
+function parseQueryString() {
+    var queryString = window.location.search.substring(1);
+    var params = {};
+    var pairs = queryString.split("&");
+    for (var i = 0; i < pairs.length; i++) {
+        var pair = pairs[i].split("=");
+        params[pair[0]] = decodeURIComponent(pair[1]);
+    }
+    return params;
+}
 
-/**
- * Once this .js is loaded, the following scripts will be executed by the browser
- */
+// Function to make AJAX call with query parameters
+function searchMovies(formData) {
+    $.ajax({
+        url: "api/search",
+        method: "GET",
+        data: formData,
+        success: handleMovieResult,
+        error: function(xhr, status, error) {
+            console.error("Error fetching movies:", error);
+        }
+    });
+}
 
-// Makes the HTTP GET request and registers the success callback function handleMovieResult
-jQuery.ajax({
-    dataType: "json", // Setting return data type
-    method: "GET", // Setting request method
-    url: "api/movies", // Setting request URL, which is mapped by MoviesServlet in Movies.java
-    success: (resultData) => handleMovieResult(resultData) // Setting callback function to handle data returned successfully by the MoviesServlet
+$(document).ready(function() {
+    var queryParams = parseQueryString();
+
+    searchMovies(queryParams);
 });
