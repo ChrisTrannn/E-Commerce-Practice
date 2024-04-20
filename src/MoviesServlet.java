@@ -1,6 +1,5 @@
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import jakarta.servlet.ServletConfig;
@@ -14,7 +13,6 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-
 
 // Declaring a WebServlet called StarsServlet, which maps to url "/api/movies"
 @WebServlet(name = "MoviesServlet", urlPatterns = "/api/movies")
@@ -36,18 +34,20 @@ public class MoviesServlet extends HttpServlet {
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
         response.setContentType("application/json"); // Response mime type
 
         // Output stream to STDOUT
         PrintWriter out = response.getWriter();
 
+        // Retrieve query parameter for browse feature
+        String genre_id = request.getParameter("genre");
+        String title_id = request.getParameter("title");
+
         // Get a connection from dataSource and let resource manager close the connection after usage.
         try (Connection conn = dataSource.getConnection()) {
-
-            // Declare our statement
             Statement statement = conn.createStatement();
 
+            // query to get all movies
             String query = "SELECT m.id AS movie_id, m.title, m.year, m.director, r.rating AS rating, " +
                     "(SELECT GROUP_CONCAT(DISTINCT g.name SEPARATOR ', ') FROM genres_in_movies AS gm " +
                         "INNER JOIN genres AS g ON gm.genreId = g.id " +
@@ -57,12 +57,26 @@ public class MoviesServlet extends HttpServlet {
                             "INNER JOIN stars AS s ON sm.starId = s.id) AS stars " +
                     "FROM movies AS m " +
                     "INNER JOIN ratings AS r ON m.id = r.movieId " +
-                    "ORDER BY r.rating DESC " +
-                    "LIMIT 20;";
+                    "INNER JOIN genres_in_movies AS gm ON m.id = gm.movieId " +
+                    "INNER JOIN genres AS g ON gm.genreId = g.id " +
+                    "WHERE 1=1 ";
+
+            // add filtering conditions for genre and title
+            if (genre_id != null && !genre_id.isEmpty()) {
+                query += "AND g.id = " + genre_id + ";";
+            } else if (title_id != null && !title_id.isEmpty()) {
+                // Handle the '*' case: match titles that start with non-alphanumeric characters
+                if (title_id.equals("*")) {
+                    query += "AND m.title REGEXP '^[^a-zA-Z0-9]';";
+                } else {
+                    query += "AND m.title LIKE '" + title_id + "%';";
+                }
+            }
 
             // Perform the query
             ResultSet rs = statement.executeQuery(query);
 
+            // Create a JsonArray to hold the data we retrieve from rs
             JsonArray jsonArray = new JsonArray();
 
             // Iterate through each row of rs
@@ -107,11 +121,11 @@ public class MoviesServlet extends HttpServlet {
 
             // Write JSON string to output
             out.write(jsonArray.toString());
+
             // Set response status to 200 (OK)
             response.setStatus(200);
 
         } catch (Exception e) {
-
             // Write error message JSON object to output
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("errorMessage", e.getMessage());
@@ -122,8 +136,5 @@ public class MoviesServlet extends HttpServlet {
         } finally {
             out.close();
         }
-
-        // Always remember to close db connection after usage. Here it's done by try-with-resources
-
     }
 }
