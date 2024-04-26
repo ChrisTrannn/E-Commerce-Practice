@@ -10,8 +10,6 @@ function handleSearchResult(resultDataString, formData) {
             // If search results are returned, redirect the user to movie-list.html with form data
             let queryString = $.param(formData);
 
-            console.log("Redirecting to movie-list.html?" + queryString);
-
             window.location.href = "movie-list.html?" + queryString;
         } catch (error) {
             console.error("Error parsing JSON:", error);
