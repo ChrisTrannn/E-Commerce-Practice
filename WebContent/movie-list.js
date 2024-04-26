@@ -4,7 +4,6 @@
  */
 function handleMovieResult(resultData) {
     console.log("handleMovieResult: populating movie table from resultData");
-    console.log(resultData)
 
     // Populate the movie table, Find the empty table body by id "movie_table_body"
     let movieTableBodyElement = jQuery("#movie_table_body");
@@ -37,6 +36,7 @@ function handleMovieResult(resultData) {
         movieTableBodyElement.append(rowHTML);
     }
 }
+
 // Function to parse query parameters from URL
 function parseQueryString() {
     var queryString = window.location.search.substring(1);
@@ -52,7 +52,7 @@ function parseQueryString() {
 // Function to make AJAX call with query parameters
 function searchMovies(formData) {
     $.ajax({
-        url: "api/search",
+        url: "api/movies",
         method: "GET",
         data: formData,
         success: handleMovieResult,

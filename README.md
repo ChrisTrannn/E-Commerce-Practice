@@ -7,3 +7,4 @@ Chris Tran: Single Movie Page, Single Star Page, Jump Req
 [AWS Deployment](http://54.67.7.111:8080/cs122b-s24-team-sc/movie-list.html)
 
 -Creation of dev branch (testing branch before merging into main)
+-Creation of task2-browse branch off of dev branch

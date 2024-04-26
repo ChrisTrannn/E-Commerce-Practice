@@ -39,7 +39,7 @@ function submitSearch(formSubmitEvent) {
     // Convert the form data to a query string
     let queryString = $.param(formData);
     $.ajax({
-        url: "api/search",
+        url: "api/movies",
         method: "GET",
         data: queryString,
         success: function(resultDataString) {
