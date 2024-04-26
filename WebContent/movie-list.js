@@ -1,12 +1,7 @@
-// parses the url and get the parameter of genre or title
-function getUrlParameter(name) {
-    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-    let regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-    let results = regex.exec(location.search);
-    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-}
-
-// Handles the data returned by the API, reads the jsonObject, and populates data into HTML elements
+/**
+ * Handles the data returned by the API, reads the jsonObject, and populates data into HTML elements
+ * @param resultData jsonObject
+ */
 function handleMovieResult(resultData) {
     console.log("handleMovieResult: populating movie table from resultData");
 
@@ -42,31 +37,33 @@ function handleMovieResult(resultData) {
     }
 }
 
-// Get the parameter from url, parameter could be title or genre
-let title = getUrlParameter("title");
-let genre = getUrlParameter("genre");
+// Function to parse query parameters from URL
+function parseQueryString() {
+    var queryString = window.location.search.substring(1);
+    var params = {};
+    var pairs = queryString.split("&");
+    for (var i = 0; i < pairs.length; i++) {
+        var pair = pairs[i].split("=");
+        params[pair[0]] = decodeURIComponent(pair[1]);
+    }
+    return params;
+}
 
-// make GET request to get the movie list: if title, url "api/movies?title=" + title; if genre, url "api/movies?genre=" + genre
-if (title !== "") {
-    jQuery.ajax({
-        dataType: "json",
+// Function to make AJAX call with query parameters
+function searchMovies(formData) {
+    $.ajax({
+        url: "api/movies",
         method: "GET",
-        url: "api/movies?title=" + title,
-        success: (resultData) => handleMovieResult(resultData)
-    });
-} else if (genre !== "") {
-    jQuery.ajax({
-        dataType: "json",
-        method: "GET",
-        url: "api/movies?genre=" + genre,
-        success: (resultData) => handleMovieResult(resultData)
-    });
-} else {
-    // Makes the HTTP GET request and registers the success callback function handleMovieResult
-    jQuery.ajax({
-        dataType: "json", // Setting return data type
-        method: "GET", // Setting request method
-        url: "api/movies", // Setting request URL, which is mapped by MoviesServlet in Movies.java
-        success: (resultData) => handleMovieResult(resultData) // Setting callback function to handle data returned successfully by the MoviesServlet
+        data: formData,
+        success: handleMovieResult,
+        error: function(xhr, status, error) {
+            console.error("Error fetching movies:", error);
+        }
     });
 }
+
+$(document).ready(function() {
+    var queryParams = parseQueryString();
+
+    searchMovies(queryParams);
+});

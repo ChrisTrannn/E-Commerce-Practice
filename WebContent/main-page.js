@@ -9,7 +9,7 @@ function handleGenresResult(resultData) {
     for (let i = 0; i < resultData.length; i++) {
         let genre = resultData[i]["name"];
         let id = resultData[i]["id"];
-        let li = `<li><a href="movie-list.html?genre=${id}">${genre}</a></li>`;
+        let li = `<li><a href="movie-list.html?genre_id=${id}">${genre}</a></li>`;
         genresListElement.append(li);
     }
 }
@@ -27,7 +27,7 @@ let titlesListCharactersElement = jQuery("#titles_list_characters");
 // iterate through A-Z and add elements
 for (let i = 65; i <= 90; i++) {
     let letter = String.fromCharCode(i);
-    let a = `<a href="movie-list.html?title=${letter}">${letter}</a>`;
+    let a = `<a href="movie-list.html?title_id=${letter}">${letter}</a>`;
     titlesListCharactersElement.append(a);
 }
 
@@ -35,7 +35,7 @@ for (let i = 65; i <= 90; i++) {
 let titlesListNumbersElement = jQuery("#titles_list_numbers");
 // iterate through 0-9 and add elements
 for (let i = 0; i <= 9; i++) {
-    let a = `<a href="movie-list.html?title=${i}">${i}</a>`;
+    let a = `<a href="movie-list.html?title_id=${i}">${i}</a>`;
     titlesListNumbersElement.append(a);
 }
-titlesListNumbersElement.append(`<a href="movie-list.html?title=*">*</a>`);
+titlesListNumbersElement.append(`<a href="movie-list.html?title_id=*">*</a>`);
