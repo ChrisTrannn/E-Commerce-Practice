@@ -63,6 +63,7 @@ public class MoviesServlet extends HttpServlet {
             String starName = request.getParameter("starName");
             String genre_id = request.getParameter("genre_id");
             String title_id = request.getParameter("title_id");
+            String sortParam = request.getParameter("sort");
 
             String query = "SELECT DISTINCT m.id AS movie_id, m.title, m.year, m.director, r.rating AS rating, " +
                     "(SELECT GROUP_CONCAT(DISTINCT g.name SEPARATOR ', ') FROM genres_in_movies AS gm " +
@@ -101,6 +102,38 @@ public class MoviesServlet extends HttpServlet {
                     query += " AND m.title REGEXP '^[^a-zA-Z0-9]'";
                 } else {
                     query += " AND m.title LIKE '" + title_id + "%'";
+                }
+            }
+
+            if (sortParam != null && !sortParam.isEmpty()) {
+                switch (sortParam) {
+                    case "titleAsc":
+                        query += " ORDER BY m.title ASC, r.rating ASC";
+                        break;
+                    case "titleDesc":
+                        query += " ORDER BY m.title DESC, r.rating ASC";
+                        break;
+                    case "ratingAsc":
+                        query += " ORDER BY r.rating ASC, m.title DESC";
+                        break;
+                    case "ratingDesc":
+                        query += " ORDER BY r.rating DESC, m.title ASC";
+                        break;
+                    case "titleRatingAsc":
+                        query += " ORDER BY m.title ASC, r.rating ASC";
+                        break;
+                    case "titleRatingDesc":
+                        query += " ORDER BY m.title DESC, r.rating ASC";
+                        break;
+                    case "ratingTitleAsc":
+                        query += " ORDER BY r.rating ASC, m.title ASC";
+                        break;
+                    case "ratingTitleDesc":
+                        query += " ORDER BY r.rating DESC, m.title ASC";
+                        break;
+                    default:
+                        // Handle unsupported sorting parameter
+                        break;
                 }
             }
             query += ";";

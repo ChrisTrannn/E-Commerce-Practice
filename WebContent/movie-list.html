@@ -27,7 +27,28 @@
 </header>
 <!-- Id "star_table" is useful for jQuery to find the html element with id, class here is mapping to Bootstrap defined class CSS -->
 <div class = "container custom-container">
-    <h1>Result</h1>
+    <div class="row">
+        <div class="col-8">
+            <h1>Result</h1>
+        </div>
+        <div class="col-4 d-flex justify-content-end">
+            <!-- Shortened Sorting Dropdowns with ASC and DESC -->
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="sortingDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Sort Movies
+                </button>
+                <div class="dropdown-menu" aria-labelledby="sortingDropdown">
+                    <a class="dropdown-item" href="#" data-sort="titleAsc">Title (ASC) - Rating (ASC)</a>
+                    <a class="dropdown-item" href="#" data-sort="titleDesc">Title (DESC) - Rating (ASC)</a>
+                    <a class="dropdown-item" href="#" data-sort="ratingAsc">Rating (ASC) - Title (DESC)</a>
+                    <a class="dropdown-item" href="#" data-sort="ratingDesc">Rating (DESC) - Title (ASC)</a>
+                    <a class="dropdown-item" href="#" data-sort="titleRatingAsc">Title (ASC) - Rating (ASC)</a>
+                    <a class="dropdown-item" href="#" data-sort="titleRatingDesc">Title (DESC) - Rating (ASC)</a>
+                    <a class="dropdown-item" href="#" data-sort="ratingTitleAsc">Rating (ASC) - Title (ASC)</a>
+                    <a class="dropdown-item" href="#" data-sort="ratingTitleDesc">Rating (DESC) - Title (ASC)</a>
+                </div>
+            </div>
+        </div>
         <table id="movie_table" class="table table-striped">
             <thead>
             <tr>

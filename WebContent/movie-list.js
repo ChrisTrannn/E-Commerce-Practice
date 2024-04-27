@@ -50,11 +50,11 @@ function parseQueryString() {
 }
 
 // Function to make AJAX call with query parameters
-function searchMovies(formData) {
+function searchMovies(queryParams) {
     $.ajax({
         url: "api/movies",
         method: "GET",
-        data: formData,
+        data: queryParams,
         success: handleMovieResult,
         error: function(xhr, status, error) {
             console.error("Error fetching movies:", error);
@@ -66,4 +66,21 @@ $(document).ready(function() {
     var queryParams = parseQueryString();
 
     searchMovies(queryParams);
+});
+
+// Add event listener to the sorting dropdown items
+$('.dropdown-item').click(function() {
+    // Get the sorting parameter from the clicked dropdown item
+    let sortingParam = $(this).attr('data-sort');
+
+    // Get existing query parameters
+    var queryParams = parseQueryString();
+
+    // Add/update sorting parameter in the query params
+    queryParams['sort'] = sortingParam;
+
+    var url = window.location.pathname + '?' + $.param(queryParams);
+
+    // Redirect
+    window.location.href = url;
 });
