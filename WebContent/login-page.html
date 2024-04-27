@@ -4,29 +4,32 @@
 <head>
   <meta charset="UTF-8">
   <title>Login Fablix</title>
+  <link rel="stylesheet" href="login-page.css">
 </head>
 <body>
 
-<!-- Header -->
-<h2>Login to Fablix</h2>
+<!-- Login component -->
+<div id="login_component">
+  <h2>Login to Fablix</h2>
 
-<!-- Set the method to POST to avoid showing the username/password in the URL The default action is disabled to allow your own implementation. -->
-<form id="login_form" method="post" action="#">
-  <label><b>Username</b></label>
-  <label>
-    <input name="username" placeholder="Enter Username" type="text">
-  </label>
-  <br>
-  <label><b>Password</b></label>
-  <label>
-    <input name="password" placeholder="Enter Password" type="password">
-  </label>
-  <br>
-  <input type="submit" value="Login">
-</form>
+  <!-- Set the method to POST to avoid showing the username/password in the URL The default action is disabled to allow your own implementation. -->
+  <form id="login_form" method="post" action="#">
+    <label><b>Username</b></label><br>
+    <label>
+      <input name="username" placeholder="Enter Username" type="text">
+    </label>
+    <br>
+    <label><b>Password</b></label><br>
+    <label>
+      <input name="password" placeholder="Enter Password" type="password">
+    </label>
+    <br>
+    <input id="login_submit" type="submit" value="Login">
+  </form>
 
-<!-- Error message will be displayed here -->
-<div id="login_error_message"></div>
+  <!-- Error message will be displayed here -->
+  <div id="login_error_message"></div>
+</div>
 
 <!-- Scripts loaded here -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
