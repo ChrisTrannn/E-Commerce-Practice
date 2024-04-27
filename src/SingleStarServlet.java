@@ -53,8 +53,9 @@ public class SingleStarServlet extends HttpServlet {
             // Get a connection from dataSource
 
             // Construct a query with parameter represented by "?"
-            String query = "SELECT * from stars as s, stars_in_movies as sim, movies as m " +
-                    "where m.id = sim.movieId and sim.starId = s.id and s.id = ?";
+            String query = "SELECT * FROM stars AS s, stars_in_movies AS sim, movies AS m " +
+                    "WHERE m.id = sim.movieId AND sim.starId = s.id AND s.id = ?" +
+                    "ORDER BY m.year DESC, m.title ASC";
 
             // Declare our statement
             PreparedStatement statement = conn.prepareStatement(query);

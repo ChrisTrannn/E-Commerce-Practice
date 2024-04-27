@@ -6,6 +6,9 @@
                 <li class="nav-item">
                     <a class="nav-link text-light" href="./main-page.html">Home</a>
                 </li>
+                <li class="nav-item">
+                    <a id="moviesListButton" class="nav-link text-light">Movies List</a>
+                </li>
             </ul>
         </div>
         <div>
@@ -42,3 +45,12 @@
         </div>
     </div>
 </nav>
+
+<script>
+    function setPreviousPageLink() {
+        var previousPageURL = sessionStorage.getItem('queryParams');
+        if (previousPageURL) {
+            $('#moviesListButton').attr('href', previousPageURL);
+        }
+    }
+</script>

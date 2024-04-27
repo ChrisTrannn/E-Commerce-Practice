@@ -83,6 +83,18 @@ function handleResult(resultData) {
 /**
  * Once this .js is loaded, following scripts will be executed by the browser\
  */
+// single-star.js
+
+$(function() {
+    // Get the previous page URL from sessionStorage
+    var previousPageURL = sessionStorage.getItem('previousPageURL');
+    console.log(previousPageURL);
+
+    $('#prevButton').click(function() {
+        console.log('Button clicked');
+        window.location.href = previousPageURL;
+    });
+});
 
 // Get id from URL
 let starId = getParameterByName('id');

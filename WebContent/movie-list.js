@@ -75,6 +75,13 @@ function searchMovies(queryParams) {
 }
 
 $(document).ready(function() {
+    // Get the current page URL
+    var currentPageURL = window.location.href;
+
+    console.log(currentPageURL);
+
+    // Store the current page URL in sessionStorage as the previous URL
+    sessionStorage.setItem('previousPageURL', currentPageURL);
     console.log("Document is ready.");
     var queryParams = parseQueryString();
 
@@ -159,6 +166,7 @@ $(document).ready(function() {
         let url = window.location.pathname + '?' + $.param(queryParams);
         window.location.href = url;
     });
+
 });
 
 // Function to handle pagination

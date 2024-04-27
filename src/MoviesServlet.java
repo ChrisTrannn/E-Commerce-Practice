@@ -107,8 +107,6 @@ public class MoviesServlet extends HttpServlet {
                     "    stars AS s ON sim.starId = s.id " +
                     "WHERE 1=1";
 
-
-
             // add filtering conditions
             if (title != null && !title.isEmpty()) {
                 query += " AND m.title LIKE '%" + title + "%'";

@@ -79,6 +79,17 @@ function handleResult(resultData) {
     }
 }
 
+$(function() {
+    // Get the previous page URL from sessionStorage
+    var previousPageURL = sessionStorage.getItem('previousPageURL');
+    console.log(previousPageURL);
+
+    $('#prevButtonMovie').click(function() {
+        console.log('Button clicked');
+        window.location.href = previousPageURL;
+    });
+});
+
 /**
  * Once this .js is loaded, following scripts will be executed by the browser\
  */
