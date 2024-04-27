@@ -17,54 +17,68 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <title>Star List</title>
+    <title>Movie List</title>
     <link rel="stylesheet" href="movie-and-star.css">
 </head>
 
 <body>
-<header>
-    <div id="navbar-container"></div>
-</header>
-<!-- Id "star_table" is useful for jQuery to find the html element with id, class here is mapping to Bootstrap defined class CSS -->
-<div class = "container custom-container">
-    <div class="row">
-        <div class="col-8">
-            <h1>Result</h1>
-        </div>
-        <div class="col-4 d-flex justify-content-end">
-            <!-- Shortened Sorting Dropdowns with ASC and DESC -->
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="sortingDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Sort Movies
-                </button>
-                <div class="dropdown-menu" aria-labelledby="sortingDropdown">
-                    <a class="dropdown-item" href="#" data-sort="titleAsc">Title (ASC) - Rating (ASC)</a>
-                    <a class="dropdown-item" href="#" data-sort="titleDesc">Title (DESC) - Rating (ASC)</a>
-                    <a class="dropdown-item" href="#" data-sort="ratingAsc">Rating (ASC) - Title (DESC)</a>
-                    <a class="dropdown-item" href="#" data-sort="ratingDesc">Rating (DESC) - Title (ASC)</a>
-                    <a class="dropdown-item" href="#" data-sort="titleRatingAsc">Title (ASC) - Rating (ASC)</a>
-                    <a class="dropdown-item" href="#" data-sort="titleRatingDesc">Title (DESC) - Rating (ASC)</a>
-                    <a class="dropdown-item" href="#" data-sort="ratingTitleAsc">Rating (ASC) - Title (ASC)</a>
-                    <a class="dropdown-item" href="#" data-sort="ratingTitleDesc">Rating (DESC) - Title (ASC)</a>
+
+    <div id="navbar-place"></div>
+    <!-- Id "star_table" is useful for jQuery to find the html element with id, class here is mapping to Bootstrap defined class CSS -->
+    <div class = "container custom-container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h1>Result</h1>
+                </div>
+                <div class="col-md-3">
+                    <!-- Select for selecting movies per page -->
+                    <select class="form-control" id="perPageSelect">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <!-- Select for sorting movies -->
+                    <select class="form-control" id="sortingSelect">
+                        <option value="titleAsc">Title (ASC) - Rating (ASC)</option>
+                        <option value="titleDesc">Title (DESC) - Rating (ASC)</option>
+                        <option value="ratingAsc">Rating (ASC) - Title (DESC)</option>
+                        <option value="ratingDesc">Rating (DESC) - Title (ASC)</option>
+                        <option value="titleRatingAsc">Title (ASC) - Rating (ASC)</option>
+                        <option value="titleRatingDesc">Title (DESC) - Rating (ASC)</option>
+                        <option value="ratingTitleAsc">Rating (ASC) - Title (ASC)</option>
+                        <option value="ratingTitleDesc">Rating (DESC) - Title (ASC)</option>
+                    </select>
+                </div>
+
+            </div>
+            <table id="movie_table" class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Year</th>
+                    <th>Director</th>
+                    <th>Genres</th>
+                    <th>Stars</th>
+                    <th>Rating</th>
+                </tr>
+                </thead>
+                <!-- Table body is left empty here, will be populated with the data retrieved with movie-list.js -->
+                <!-- Again, id "star_table_body" is useful for jQuery to find this html element -->
+                <tbody id="movie_table_body"></tbody>
+            </table>
+            <!-- Previous and Next buttons for pagination -->
+            <div class="row">
+                <div class="col-md-12 text-center mt-3">
+                    <button id="prevButton" class="btn btn-secondary mr-2">Prev</button>
+                    <span>Page <span id="pageNum">1</span></span> <!-- current page number -->
+                    <button id="nextButton" class="btn btn-secondary ml-2">Next</button>
                 </div>
             </div>
-        </div>
-        <table id="movie_table" class="table table-striped">
-            <thead>
-            <tr>
-                <th>Title</th>
-                <th>Year</th>
-                <th>Director</th>
-                <th>Genres</th>
-                <th>Stars</th>
-                <th>Rating</th>
-            </tr>
-            </thead>
-            <!-- Table body is left empty here, will be populated with the data retrieved with movie-list.js -->
-            <!-- Again, id "star_table_body" is useful for jQuery to find this html element -->
-            <tbody id="movie_table_body"></tbody>
-        </table>
-</div>
+    </div>
 
 
 <!-- Load jQuery and Bootstrap JS -->
@@ -78,8 +92,11 @@
      otherwise the url is relative to the root path-->
 
 <script>
-    $(document).ready(function () {
-        $('#navbar-container').load('navbar.html');
+    $(function(){
+        $('#navbar-place').load('navbar.html', function() {
+            // Load search.js after the content is loaded
+            $.getScript('search.js');
+        });
     });
 </script>
 
