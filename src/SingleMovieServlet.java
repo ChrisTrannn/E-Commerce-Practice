@@ -52,19 +52,43 @@ public class SingleMovieServlet extends HttpServlet {
         try (Connection conn = dataSource.getConnection()) {
             // Get a connection from dataSource
 
-            // Construct a query with placeholder "?"
-            String query = "SELECT m.id AS movie_id, m.title, m.year, m.director, r.rating AS rating, " +
-                    "(SELECT GROUP_CONCAT(DISTINCT g.name SEPARATOR ', ') FROM genres_in_movies AS gm " +
-                    "INNER JOIN genres AS g ON gm.genreId = g.id " +
-                    "WHERE gm.movieId = m.id) AS genres, " +
-                    "(SELECT GROUP_CONCAT(DISTINCT CONCAT(s.id, ':', s.name) SEPARATOR ', ') FROM " +
-                    "(SELECT starId FROM stars_in_movies WHERE movieId = m.id LIMIT 3 ) AS sm " +
-                    "INNER JOIN stars AS s ON sm.starId = s.id) AS stars " +
-                    "FROM movies AS m " +
-                    "INNER JOIN ratings AS r ON m.id = r.movieId " +
+            String query = "SELECT DISTINCT " +
+                    "    m.id AS movie_id, " +
+                    "    m.title, " +
+                    "    m.year, " +
+                    "    m.director, " +
+                    "    r.rating AS rating, " +
+                    "    (SELECT GROUP_CONCAT(DISTINCT g.name ORDER BY g.name SEPARATOR ', ') " +
+                    "     FROM genres_in_movies AS gm " +
+                    "     INNER JOIN genres AS g ON gm.genreId = g.id " +
+                    "     WHERE gm.movieId = m.id) AS genres, " +
+                    "    (SELECT GROUP_CONCAT(DISTINCT CONCAT(s.id, ':', s.name) ORDER BY stars_in_movies_count DESC, s.name ASC SEPARATOR ', ') " +
+                    "     FROM ( " +
+                    "         SELECT starId, COUNT(*) AS stars_in_movies_count " +
+                    "         FROM stars_in_movies " +
+                    "         GROUP BY starId " +
+                    "     ) AS sm " +
+                    "     INNER JOIN stars AS s ON sm.starId = s.id " +
+                    "     WHERE sm.starId IN (SELECT starId FROM stars_in_movies WHERE movieId = m.id) " +
+                    "     ORDER BY stars_in_movies_count DESC, s.name ASC " +
+                    "    ) AS stars, " +
+                    "    (SELECT COUNT(DISTINCT sm.starId) " +
+                    "     FROM stars_in_movies AS sm " +
+                    "     WHERE sm.movieId = m.id) AS movie_count " +
+                    "FROM " +
+                    "    movies AS m " +
+                    "INNER JOIN " +
+                    "    ratings AS r ON m.id = r.movieId " +
+                    "INNER JOIN " +
+                    "    genres_in_movies AS gm ON m.id = gm.movieId " +
+                    "INNER JOIN " +
+                    "    genres AS g ON gm.genreId = g.id " +
+                    "INNER JOIN " +
+                    "    stars_in_movies AS sim ON m.id = sim.movieId " +
+                    "INNER JOIN " +
+                    "    stars AS s ON sim.starId = s.id " +
                     "WHERE m.id = ? " +
-                    "ORDER BY r.rating DESC " +
-                    "LIMIT 20;";
+                    "ORDER BY r.rating DESC;";
 
             // Declare our statement
             PreparedStatement statement = conn.prepareStatement(query);

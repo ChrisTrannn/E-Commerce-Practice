@@ -63,21 +63,49 @@ public class MoviesServlet extends HttpServlet {
             String starName = request.getParameter("starName");
             String genre_id = request.getParameter("genre_id");
             String title_id = request.getParameter("title_id");
+            String sortParam = request.getParameter("sort");
+            String pageNumStr = request.getParameter("pageNum");
+            String perPageStr = request.getParameter("perPage");
+            int pageNum = (pageNumStr != null) ? Integer.parseInt(pageNumStr) : 1;
+            int perPage = (perPageStr != null) ? Integer.parseInt(perPageStr) : 10;
 
-            String query = "SELECT DISTINCT m.id AS movie_id, m.title, m.year, m.director, r.rating AS rating, " +
-                    "(SELECT GROUP_CONCAT(DISTINCT g.name SEPARATOR ', ') FROM genres_in_movies AS gm " +
-                    "INNER JOIN genres AS g ON gm.genreId = g.id " +
-                    "WHERE gm.movieId = m.id) AS genres, " +
-                    "(SELECT GROUP_CONCAT(DISTINCT CONCAT(s.id, ':', s.name) SEPARATOR ', ') FROM " +
-                    "(SELECT starId FROM stars_in_movies WHERE movieId = m.id LIMIT 3 ) AS sm " +
-                    "INNER JOIN stars AS s ON sm.starId = s.id) AS stars " +
-                    "FROM movies AS m " +
-                    "INNER JOIN ratings AS r ON m.id = r.movieId " +
-                    "INNER JOIN genres_in_movies AS gm ON m.id = gm.movieId " +
-                    "INNER JOIN genres AS g ON gm.genreId = g.id " +
-                    "LEFT JOIN stars_in_movies AS sim ON m.id = sim.movieId " +
-                    "LEFT JOIN stars AS s ON sim.starId = s.id " +
-                    "WHERE 1=1 ";
+            String query = "SELECT DISTINCT " +
+                    "    m.id AS movie_id, " +
+                    "    m.title, " +
+                    "    m.year, " +
+                    "    m.director, " +
+                    "    r.rating AS rating, " +
+                    "    (SELECT GROUP_CONCAT(DISTINCT g.name ORDER BY g.name SEPARATOR ', ') " +
+                    "     FROM genres_in_movies AS gm " +
+                    "     INNER JOIN genres AS g ON gm.genreId = g.id " +
+                    "     WHERE gm.movieId = m.id) AS genres, " +
+                    "    (SELECT GROUP_CONCAT(DISTINCT CONCAT(s.id, ':', s.name) ORDER BY stars_in_movies_count DESC, s.name ASC SEPARATOR ', ') " +
+                    "     FROM ( " +
+                    "         SELECT starId, COUNT(*) AS stars_in_movies_count " +
+                    "         FROM stars_in_movies " +
+                    "         GROUP BY starId " +
+                    "     ) AS sm " +
+                    "     INNER JOIN stars AS s ON sm.starId = s.id " +
+                    "     WHERE sm.starId IN (SELECT starId FROM stars_in_movies WHERE movieId = m.id) " +
+                    "     ORDER BY stars_in_movies_count DESC, s.name ASC " +
+                    "     LIMIT 3 " +
+                    "    ) AS stars, " +
+                    "    (SELECT COUNT(DISTINCT sm.starId) " +
+                    "     FROM stars_in_movies AS sm " +
+                    "     WHERE sm.movieId = m.id) AS movie_count " +
+                    "FROM " +
+                    "    movies AS m " +
+                    "INNER JOIN " +
+                    "    ratings AS r ON m.id = r.movieId " +
+                    "INNER JOIN " +
+                    "    genres_in_movies AS gm ON m.id = gm.movieId " +
+                    "INNER JOIN " +
+                    "    genres AS g ON gm.genreId = g.id " +
+                    "INNER JOIN " +
+                    "    stars_in_movies AS sim ON m.id = sim.movieId " +
+                    "INNER JOIN " +
+                    "    stars AS s ON sim.starId = s.id " +
+                    "WHERE 1=1";
 
             // add filtering conditions
             if (title != null && !title.isEmpty()) {
@@ -103,7 +131,41 @@ public class MoviesServlet extends HttpServlet {
                     query += " AND m.title LIKE '" + title_id + "%'";
                 }
             }
-            query += ";";
+
+            if (sortParam != null && !sortParam.isEmpty()) {
+                switch (sortParam) {
+                    case "titleAsc":
+                        query += " ORDER BY m.title ASC, r.rating ASC";
+                        break;
+                    case "titleDesc":
+                        query += " ORDER BY m.title DESC, r.rating ASC";
+                        break;
+                    case "ratingAsc":
+                        query += " ORDER BY r.rating ASC, m.title DESC";
+                        break;
+                    case "ratingDesc":
+                        query += " ORDER BY r.rating DESC, m.title ASC";
+                        break;
+                    case "titleRatingAsc":
+                        query += " ORDER BY m.title ASC, r.rating ASC";
+                        break;
+                    case "titleRatingDesc":
+                        query += " ORDER BY m.title DESC, r.rating ASC";
+                        break;
+                    case "ratingTitleAsc":
+                        query += " ORDER BY r.rating ASC, m.title ASC";
+                        break;
+                    case "ratingTitleDesc":
+                        query += " ORDER BY r.rating DESC, m.title ASC";
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            int offset = (pageNum - 1) * perPage;
+            query += " LIMIT " + perPage + " OFFSET " + offset + ";";
+            System.out.println(Integer.toString(pageNum) + ' ' + Integer.toString(perPage));
 
             // print the query
             System.out.println("Query: " + query);
