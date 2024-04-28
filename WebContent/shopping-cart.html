@@ -15,6 +15,7 @@
 </head>
 
 <body>
+    <div id="navbar-place"></div>
     <h1>Shopping Cart</h1>
     <div id="cartItems"></div>
     <div class="total"></div>
@@ -22,5 +23,13 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="shopping-cart.js"></script>
+    <script>
+        $(function(){
+            $('#navbar-place').load('navbar.html', function() {
+                // Load search.js after the content is loaded
+                $.getScript('search.js');
+            });
+        });
+    </script>
 </body>
 </html>

@@ -38,6 +38,7 @@ function getParameterByName(target) {
 
 function handleResult(resultData) {
     console.log("handleResult: populating movie info from resultData");
+    console.log(resultData);
     // change the title of the page to the movie name
     let movieTitle = jQuery("#movie_title");
     movieTitle.append(resultData[0]["title"]);
@@ -62,7 +63,31 @@ function handleResult(resultData) {
         rowHTML += "<td>" + resultData[i]["title"] + "</td>";
         rowHTML += "<td>" + resultData[i]["year"] + "</td>";
         rowHTML += "<td>" + resultData[i]["director"] + "</td>";
-        rowHTML += "<td>" + resultData[i]["genres"] + "</td>";
+
+        rowHTML += "<td>";
+        let genresData = resultData[i]["genres"].split(", ");
+        for (let k = 0; k < genresData.length; k++) {
+            let genreInfo = genresData[k].split(":");
+            if (genreInfo.length === 2) { // Check if the genre data is in the expected format
+                let genreId = genreInfo[0];
+                let genreName = genreInfo[1];
+                rowHTML += '<a href="movie-list.html?genre_id=' + genreId + '">' +
+                    genreName +
+                    '</a>';
+                // Add comma and space after each genre except for the last one
+                if (k < genresData.length - 1) {
+                    rowHTML += ', ';
+                }
+            } else {
+                // If the genre data is not in the expected format, simply display it
+                rowHTML += genresData[k];
+                if (k < genresData.length - 1) {
+                    rowHTML += ', ';
+                }
+            }
+        }
+        rowHTML += "</td>";
+
 
         // Add a link to single-star.html with id passed with GET url parameter
         rowHTML += "<td>";
