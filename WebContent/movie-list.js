@@ -14,6 +14,7 @@ function handleMovieResult(resultData) {
 
     // Iterate through resultData
     for (let i = 0; i < resultData.length; i++) {
+        var price = (Math.random() * (25 - 5) + 5).toFixed(2);
         // Concatenate the HTML tags with resultData jsonObject
         let rowHTML = "";
         rowHTML += "<tr>";
@@ -34,6 +35,7 @@ function handleMovieResult(resultData) {
         }
         rowHTML += "</td>";
         rowHTML += "<td>" + resultData[i]["rating"] + "</td>";
+        rowHTML += '<td><button class="addToCartButton" data-movie-id="' + resultData[i]["movie_id"] + '" data-title="' + resultData[i]["title"] + '" data-price="' + price + '">Add to Cart</button></td>';
         rowHTML += "</tr>";
 
         // Append the row created to the table body
@@ -73,8 +75,49 @@ function searchMovies(queryParams) {
         }
     });
 }
+// Function to handle adding items to the cart
+function addToCart(event) {
+    // Prevent the default form submission behavior
+    event.preventDefault();
 
-$(document).ready(function() {
+    // Retrieve the movie ID from the clicked button's data attribute
+    var movieId = $(event.currentTarget).data("movie-id");
+    var title = $(event.currentTarget).data("title");
+    var price = parseFloat($(event.currentTarget).data("price"));
+
+    // Create the cart data object
+    var cartData = {
+        movieId: movieId,
+        title: title,
+        price: price,
+        quantity: 0,
+        quantityIncrement: 1
+    };
+
+    console.log(cartData);
+
+    // Submit the cart data to the server
+    $.ajax({
+        url: "api/shopping-cart",
+        method: "POST",
+        data: cartData,
+        success: function(resultDataString) {
+            // Parse the JSON response
+            console.log(resultDataString);
+            //var resultDataJson = JSON.parse(resultDataString);
+
+            // Handle the updated cart items, if needed
+            console.log("Item added to cart:", resultDataString);
+        },
+        error: function(xhr, status, error) {
+            console.error("Error adding item to cart:", error);
+        }
+    });
+}
+
+
+$(document).ready(function() {    // Function to handle adding items to the cart
+    $("#movie_table_body").on("click", ".addToCartButton", addToCart);
     // Get the current page URL
     var currentPageURL = window.location.href;
 
