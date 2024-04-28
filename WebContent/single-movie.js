@@ -56,6 +56,7 @@ function handleResult(resultData) {
     // Iterate through resultData
     for (let i = 0; i < resultData.length; i++) {
         // Concatenate the HTML tags with resultData jsonObject
+        var price = (Math.random() * (25 - 5) + 5).toFixed(2);
         let rowHTML = "";
         rowHTML += "<tr>";
         rowHTML += "<td>" + resultData[i]["title"] + "</td>";
@@ -72,12 +73,55 @@ function handleResult(resultData) {
         }
         rowHTML += "</td>";
         rowHTML += "<td>" + resultData[i]["rating"] + "</td>";
+        rowHTML += '<td><button class="addToCartButton" data-movie-id="' + resultData[i]["movie_id"] + '" data-title="' + resultData[i]["title"] + '" data-price="' + price + '">Add to Cart</button></td>';
         rowHTML += "</tr>";
 
         // Append the row created to the table body
         movieTableBodyElement.append(rowHTML);
     }
 }
+
+function addToCart(event) {
+    // Prevent the default form submission behavior
+    event.preventDefault();
+
+    // Retrieve the movie ID from the clicked button's data attribute
+    var movieId = $(event.currentTarget).data("movie-id");
+    var title = $(event.currentTarget).data("title");
+    var price = parseFloat($(event.currentTarget).data("price"));
+
+    // Create the cart data object
+    var cartData = {
+        movieId: movieId,
+        title: title,
+        price: price,
+        quantity: 0,
+        quantityIncrement: 1
+    };
+
+    console.log(cartData);
+
+    $.ajax({
+        url: "api/shopping-cart",
+        method: "POST",
+        data: cartData,
+        success: function(resultDataString) {
+            // Parse the JSON response
+            console.log(resultDataString);
+            //var resultDataJson = JSON.parse(resultDataString);
+
+            console.log("Item added to cart:", resultDataString);
+        },
+        error: function(xhr, status, error) {
+            console.error("Error adding item to cart:", error);
+        }
+    });
+}
+
+$(document).ready(function() {
+    $(document).on("click", ".addToCartButton", addToCart);
+});
+
 
 $(function() {
     // Get the previous page URL from sessionStorage
