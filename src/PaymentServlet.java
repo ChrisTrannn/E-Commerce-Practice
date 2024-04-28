@@ -1,3 +1,5 @@
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,6 +13,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Date;
 
 @WebServlet(name = "PaymentServlet", urlPatterns = "/api/payment")
 public class PaymentServlet extends HttpServlet {
@@ -24,6 +28,62 @@ public class PaymentServlet extends HttpServlet {
             dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
         } catch (NamingException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * handles GET requests to store session information
+     */
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // send data as json response like {movies: [{saleid, movietitle, quantity, price, totalprice}]}
+        try (Connection conn = dataSource.getConnection()) {
+            // get customerId from session
+            String customerId = request.getSession().getAttribute("customerId").toString();
+
+            // query the sales table and get the saleId, movieId, movieQuantity
+            String query = "SELECT * from sales where customerId = ?";
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setString(1, customerId);
+            ResultSet rs = statement.executeQuery();
+
+            // iterate through the result set and get the saleId, movieId, movieQuantity
+            JsonArray jsonArray = new JsonArray();
+            while (rs.next()) {
+                String saleId = rs.getString("id");
+                String movieId = rs.getString("movieId");
+                String movieQuantity = rs.getString("movieQuantity");
+
+                // query the movies table and get the movieTitle, moviePrice
+                String query2 = "SELECT m.title as title, mp.price as price from movies as m, movie_and_price as mp where id = ? AND m.id = mp.movieId";
+                PreparedStatement statement2 = conn.prepareStatement(query2);
+                statement2.setString(1, movieId);
+                ResultSet rs2 = statement2.executeQuery();
+
+                // iterate through the result set and get the movieTitle, moviePrice
+                while (rs2.next()) {
+                    String movieTitle = rs2.getString("title");
+                    String moviePrice = rs2.getString("price");
+
+                    // calculate the total price
+                    double totalPrice = Double.parseDouble(moviePrice) * Double.parseDouble(movieQuantity);
+
+                    // create a json object and add it to the json array
+                    JsonObject jsonObject = new JsonObject();
+                    jsonObject.addProperty("saleId", saleId);
+                    jsonObject.addProperty("movieTitle", movieTitle);
+                    jsonObject.addProperty("quantity", movieQuantity);
+                    jsonObject.addProperty("price", moviePrice);
+                    jsonObject.addProperty("totalPrice", totalPrice);
+                    jsonArray.add(jsonObject);
+                }
+            }
+
+            // send the json array as response
+            JsonObject responseJsonObject = new JsonObject();
+            responseJsonObject.add("movies", jsonArray);
+            response.getWriter().write(responseJsonObject.toString());
+        } catch (Exception e) {
+            response.setStatus(500);
         }
     }
 
@@ -61,6 +121,26 @@ public class PaymentServlet extends HttpServlet {
                     responseJsonObject.addProperty("status", "success");
                     responseJsonObject.addProperty("message", "success");
                     response.getWriter().write(responseJsonObject.toString());
+
+                    // add record into sales table, attributes are id, customerId, movieId, saleDate, movieQuantity
+                    String customerId = request.getSession().getAttribute("customerId").toString();
+
+                    // iterate through previousItems in session and add record into sales table
+                    ArrayList<String> previousItems = (ArrayList<String>) request.getSession().getAttribute("previousItems");
+                    for (String item : previousItems) {
+                        JsonObject itemJson = new Gson().fromJson(item, JsonObject.class);
+                        String movieId = itemJson.get("movieId").getAsString();
+                        String movieQuantity = itemJson.get("quantity").getAsString();
+
+                        // add record into sales table
+                        String insertQuery = "INSERT INTO sales (customerId, movieId, saleDate, movieQuantity) VALUES (?, ?, CURDATE(), ?)";
+                        statement = conn.prepareStatement(insertQuery);
+                        statement.setString(1, customerId);
+                        statement.setString(2, movieId);
+                        statement.setString(3, movieQuantity);
+                        statement.executeUpdate();
+                    }
+
                     return;
                 }
             }
