@@ -104,9 +104,6 @@ function addToCart(event) {
         success: function(resultDataString) {
             // Parse the JSON response
             console.log(resultDataString);
-            //var resultDataJson = JSON.parse(resultDataString);
-
-            // Handle the updated cart items, if needed
             console.log("Item added to cart:", resultDataString);
         },
         error: function(xhr, status, error) {
@@ -131,7 +128,7 @@ $(document).ready(function() {    // Function to handle adding items to the cart
     // Retrieve stored page number from sessionStorage
     let storedPageNum = sessionStorage.getItem('selectedPageNum');
     if (storedPageNum) {
-        $('#pageNum').text(storedPageNum); // Set the page number
+        $('#pageNum').text(storedPageNum);
     }
 
     searchMovies(queryParams);
@@ -143,7 +140,6 @@ $(document).ready(function() {    // Function to handle adding items to the cart
         handlePagination(pageNum, perPage);
     });
 
-// Event listener for "Prev" button
     $('#prevButton').click(function() {
         var pageNum = parseInt($('#pageNum').text()) - 1;
         if (pageNum < 1) pageNum = 1; // Ensure pageNum doesn't go below 1
@@ -151,13 +147,10 @@ $(document).ready(function() {    // Function to handle adding items to the cart
         handlePagination(pageNum, perPage);
     });
 
-
-// Event listener for changing number of movies per page
     $('#perPageSelect').change(function() {
         var pageNum = parseInt($('#pageNum').text());
         var perPage = parseInt($(this).val());
 
-        // Update the query parameters
         let queryParams = parseQueryString();
         queryParams['pageNum'] = pageNum;
         queryParams['perPage'] = perPage;
@@ -173,7 +166,7 @@ $(document).ready(function() {    // Function to handle adding items to the cart
     // Set the selected perPage value from session storage if available
     let storedPerPage = sessionStorage.getItem('selectedPerPage');
     if (storedPerPage) {
-        $('#perPageSelect').val(storedPerPage); // Set the selected value
+        $('#perPageSelect').val(storedPerPage);
     }
 
 
@@ -182,7 +175,7 @@ $(document).ready(function() {    // Function to handle adding items to the cart
         $('#sortingSelect option').filter(function() {
             return $(this).text() === storedSortOption;
         }).prop('selected', true);
-        $('#sortingSelect').next('.dropdown-toggle').text(storedSortOption); // Set the dropdown button text
+        $('#sortingSelect').next('.dropdown-toggle').text(storedSortOption);
     }
 
     var currentPageNum = parseInt($('#pageNum').text());
@@ -225,13 +218,10 @@ function handlePagination(pageNum = 1, perPage = 10) {
     // Update the page number text
     $('#pageNum').text(pageNum);
 
-    // Construct the URL with the updated query parameters
     var url = window.location.pathname + '?' + $.param(queryParams);
 
-    // Set the new URL
     window.location.href = url;
 
-    // Perform AJAX call with updated query parameters
     searchMovies(queryParams);
 }
 

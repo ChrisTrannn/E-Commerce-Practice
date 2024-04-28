@@ -129,7 +129,6 @@ function updateTotal() {
 
 // Function to increment quantity
 function incrementQuantity(movieId, title, price, quantity) {
-    // Create the cart data object
     var cartData = {
         movieId: movieId,
         title: title,
@@ -140,21 +139,14 @@ function incrementQuantity(movieId, title, price, quantity) {
 
     // Submit the cart data to the server
     $.ajax({
-        url: "api/shopping-cart", // Specify the endpoint for incrementing quantity
+        url: "api/shopping-cart",
         method: "POST",
         data: cartData,
         success: function(resultDataString) {
-            // Handle the response, if needed
-            console.log("Quantity incremented:", resultDataString);
-            console.log(resultDataString['newQuantity']);
-
-            // Update the displayed quantity, if needed
             const quantityDisplay = document.querySelector(`.cart-item[data-movie-id="${movieId}"] span.quantity`);
             console.log(quantityDisplay);
             if (quantityDisplay) {
-                console.log(quantityDisplay.textContent);
                 quantityDisplay.textContent = resultDataString['newQuantity'];
-                console.log(quantityDisplay.textContent);
             }
         },
         error: function(xhr, status, error) {
@@ -171,20 +163,17 @@ function decrementQuantity(movieId, title, price, quantity) {
         title: title,
         price: price,
         quantity: quantity,
-        quantityIncrement: -1 // Use negative quantityIncrement for decrementing
+        quantityIncrement: -1
     };
 
-    // Submit the cart data to the server
     $.ajax({
-        url: "api/shopping-cart", // Specify the endpoint for decrementing quantity
+        url: "api/shopping-cart",
         method: "POST",
         data: cartData,
         success: function(resultDataString) {
-            // Handle the response, if needed
             console.log("Quantity decremented:", resultDataString);
             console.log(resultDataString['newQuantity']);
 
-            // Update the displayed quantity, if needed
             const quantityDisplay = document.querySelector(`.cart-item[data-movie-id="${movieId}"] span.quantity`);
             if (quantityDisplay) {
                 quantityDisplay.textContent = resultDataString['newQuantity'];
@@ -198,18 +187,15 @@ function decrementQuantity(movieId, title, price, quantity) {
 
 
 function deleteCartItem(movieId) {
-    // Make a DELETE request to delete the item from the cart
     $.ajax({
-        url: "api/shopping-cart", // Endpoint for deleting cart items
+        url: "api/shopping-cart",
         method: "DELETE",
-        data: {movieId: movieId}, // Include the movieId to identify which item to delete
+        data: {movieId: movieId},
         success: function (response) {
             console.log("Item deleted successfully:", response);
-            // Handle any UI updates or notifications here
         },
         error: function (xhr, status, error) {
             console.error("Error deleting item from cart:", error);
-            // Handle any error messages or UI updates here
         }
     });
 

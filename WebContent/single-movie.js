@@ -101,7 +101,6 @@ function addToCart(event) {
 
     console.log(cartData);
 
-    // Submit the cart data to the server
     $.ajax({
         url: "api/shopping-cart",
         method: "POST",
@@ -111,7 +110,6 @@ function addToCart(event) {
             console.log(resultDataString);
             //var resultDataJson = JSON.parse(resultDataString);
 
-            // Handle the updated cart items, if needed
             console.log("Item added to cart:", resultDataString);
         },
         error: function(xhr, status, error) {
@@ -121,7 +119,6 @@ function addToCart(event) {
 }
 
 $(document).ready(function() {
-    // Add event listener for the "Add to Cart" button
     $(document).on("click", ".addToCartButton", addToCart);
 });
 
