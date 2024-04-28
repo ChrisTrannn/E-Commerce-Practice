@@ -105,6 +105,7 @@ function addToCart(event) {
             // Parse the JSON response
             console.log(resultDataString);
             console.log("Item added to cart:", resultDataString);
+            alert('"' + title + '" added to cart!');
         },
         error: function(xhr, status, error) {
             console.error("Error adding item to cart:", error);

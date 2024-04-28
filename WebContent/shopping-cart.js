@@ -24,7 +24,6 @@ function fetchCartItems() {
     });
 }
 
-
 function displayCartItems(cartItems) {
     const cartItemsDiv = document.getElementById("cartItems");
     cartItemsDiv.innerHTML = ""; // Clear previous items
@@ -54,7 +53,7 @@ function displayCartItems(cartItems) {
             minusButton.addEventListener("click", function() {
                 parsedItem.quantity--;
                 quantityDisplay.textContent = parsedItem.quantity;
-                totalPriceDiv.textContent = `Total Price: ${parsedItem.price * parsedItem.quantity}`;
+                totalPriceDiv.textContent = `Total Price: ${(parsedItem.price * parsedItem.quantity).toFixed(2)}`;
                 decrementQuantity(parsedItem.movieId, parsedItem.title, parsedItem.price, parsedItem.quantity);
                 updateTotal();
             });
@@ -69,7 +68,7 @@ function displayCartItems(cartItems) {
             plusButton.addEventListener("click", function() {
                 parsedItem.quantity++;
                 quantityDisplay.textContent = parsedItem.quantity;
-                totalPriceDiv.textContent = `Total Price: ${parsedItem.price * parsedItem.quantity}`;
+                totalPriceDiv.textContent = `Total Price: ${(parsedItem.price * parsedItem.quantity).toFixed(2)}`;
                 incrementQuantity(parsedItem.movieId, parsedItem.title, parsedItem.price, parsedItem.quantity);
                 updateTotal();
             });
@@ -89,12 +88,12 @@ function displayCartItems(cartItems) {
 
             // Display price of each movie
             const priceDiv = document.createElement("div");
-            priceDiv.textContent = `Price: ${parsedItem.price}`;
+            priceDiv.textContent = `Price: ${parsedItem.price.toFixed(2)}`;
             itemDiv.appendChild(priceDiv);
 
             // Display total price (price * quantity)
             const totalPriceDiv = document.createElement("div");
-            totalPriceDiv.textContent = `Total Price: ${parsedItem.price * parsedItem.quantity}`;
+            totalPriceDiv.textContent = `Total Price: ${(parsedItem.price * parsedItem.quantity).toFixed(2)}`;
             itemDiv.appendChild(totalPriceDiv);
 
             // Append the cart item div to the cart items container
@@ -108,7 +107,7 @@ function displayCartItems(cartItems) {
     }
     // Display total outside the loop
     const totalDiv = document.createElement("div");
-    totalDiv.textContent = `Checkout Total: ${(total)}`;
+    totalDiv.textContent = `Checkout Total: ${total.toFixed(2)}`;
     document.querySelector(".total").appendChild(totalDiv);
 
     // Call updateTotal to ensure initial calculation is displayed
@@ -124,7 +123,7 @@ function updateTotal() {
         total += price;
     });
     const totalDiv = document.querySelector(".total");
-    totalDiv.textContent = `Checkout Total: ${total}`;
+    totalDiv.textContent = `Checkout Total: $${total.toFixed(2)}`;
 }
 
 // Function to increment quantity
