@@ -1,6 +1,27 @@
 let payment_form = $("#payment_form");
 
 /**
+ * Retrieve parameter from request URL, matching by parameter name
+ * @param target String
+ * @returns {*}
+ */
+function getParameterByName(target) {
+    // Get request URL
+    let url = window.location.href;
+    // Encode target parameter name to url encoding
+    target = target.replace(/[\[\]]/g, "\\$&");
+
+    // Ues regular expression to find matched parameter value
+    let regex = new RegExp("[?&]" + target + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+
+    // Return the decoded parameter value
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+/**
  * Handle the data returned by PaymentServlet
  * @param resultDataString jsonObject
  */
@@ -47,3 +68,7 @@ function submitPaymentForm(formSubmitEvent) {
 
 // Bind the submit action of the form to a handler function
 payment_form.submit(submitPaymentForm);
+
+// Get the total price from the URL parameter, add totalPrice to the cart_total_price element
+let totalPrice = getParameterByName("totalPrice");
+$("#cart_total_price").text("Final Payment: $" + totalPrice);

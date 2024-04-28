@@ -1,12 +1,18 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import jakarta.servlet.ServletConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -14,6 +20,18 @@ import java.util.List;
 
 @WebServlet(name = "ShoppingCartServlet", urlPatterns = "/api/shopping-cart")
 public class ShoppingCartServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    // Create a dataSource which registered in web.
+    private DataSource dataSource;
+
+    public void init(ServletConfig config) {
+        try {
+            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+    }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // Get the session
@@ -45,6 +63,20 @@ public class ShoppingCartServlet extends HttpServlet {
         int quantityIncrement = Integer.parseInt(request.getParameter("quantityIncrement"));
         double price = Double.parseDouble(request.getParameter("price"));
         String title = request.getParameter("title");
+
+        // add the movieId and price into the movie_and_price table
+        try (Connection conn = dataSource.getConnection()) {
+            // only insert if the movieId does not exist in the table
+            String query = "INSERT INTO movie_and_price (movieId, price) VALUES (?, ?) ON DUPLICATE KEY UPDATE price = ?;";
+            System.out.println(query);
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setString(1, movieId);
+            statement.setDouble(2, price);
+            statement.setDouble(3, price);
+            statement.executeUpdate();
+        } catch (Exception e) {
+             e.printStackTrace();
+        }
 
         // Get the session
         HttpSession session = request.getSession();

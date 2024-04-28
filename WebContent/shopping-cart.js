@@ -1,3 +1,5 @@
+let total = 0;
+
 document.addEventListener("DOMContentLoaded", function() {
     // Fetch cart items from server and display them
     fetchCartItems();
@@ -5,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Add event listener to proceed to payment button
     document.getElementById("proceedToPaymentBtn").addEventListener("click", function() {
         // Redirect to payment page
-        window.location.href = "payment.html";
+        window.location.href = "payment-page.html?totalPrice=" + total;
     });
 });
 
@@ -27,7 +29,7 @@ function fetchCartItems() {
 function displayCartItems(cartItems) {
     const cartItemsDiv = document.getElementById("cartItems");
     cartItemsDiv.innerHTML = ""; // Clear previous items
-    let total = 0;
+    // let total = 0;
     // Check if cartItems['previousItems'] is an array
     if (Array.isArray(cartItems['previousItems'])) {
         // Iterate over each item in the array

@@ -50,8 +50,9 @@ public class LoginServlet extends HttpServlet {
 
                 // Login success if there's a match
                 if (email.equals(username) && passwd.equals(password)) {
-                    // set this user into the session
+                    // set this user into the session, set customerId into session as well
                     request.getSession().setAttribute("user", new User(username));
+                    request.getSession().setAttribute("customerId", rs.getString("id"));
 
                     // send success message
                     JsonObject responseJsonObject = new JsonObject();
