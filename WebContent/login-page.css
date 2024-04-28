@@ -45,3 +45,7 @@ html {
 #login_error_message {
     text-align: center;
 }
+
+#login_submit:hover {
+    background-color: #ff5c5c;
+}
