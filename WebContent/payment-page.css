@@ -7,10 +7,10 @@
     border-radius: 15px;
     border: 1px solid black;
     margin: 0 auto;
-    width: 23em;
-    padding-top: 1.5em;
-    padding-bottom: 1.5em;
-    margin-top: 10em;
+    width: 35em;
+    padding-top: 2.5em;
+    padding-bottom: 2em;
+    margin-top: 5em;
 }
 
 #payment_component input {
@@ -18,6 +18,7 @@
     margin-bottom: 0.8em;
     padding: 0.7em;
     margin-top: 0.3em;
+    width: 24em;
 }
 
 #payment_component h2 {
@@ -27,7 +28,7 @@
 
 #payment_component form {
     margin: 0 auto;
-    width: 12em;
+    width: 24em;
 }
 
 #place_order_button
@@ -51,8 +52,4 @@
 
 #place_order_button:hover {
     background-color: #ff4b4b;
-}
-
-#card_expiration_date {
-    width: 13.5em;
 }

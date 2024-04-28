@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Payment Information</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="payment-page.css">
 </head>
 <body>
+
+<!-- Navbar component -->
+<div id="navbar-place"></div>
 
 <!-- Payment form component -->
 <div id="payment_component">
@@ -42,6 +48,14 @@
 <!-- Scripts loaded here -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="payment-page.js"></script>
+<script>
+    $(function(){
+        $('#navbar-place').load('navbar.html', function() {
+            // Load search.js after the content is loaded
+            $.getScript('search.js');
+        });
+    });
+</script>
 
 </body>
 </html>

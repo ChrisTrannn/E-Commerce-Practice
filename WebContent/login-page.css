@@ -2,11 +2,9 @@
     font-family: Verdana;
 }
 
-
 html {
     background-color: #ed3e3e;
 }
-
 
 #login_component {
     background-color: white;
@@ -18,7 +16,6 @@ html {
     margin-top: 15em;
 }
 
-
 #login_component input {
     border-radius: 10px;
     margin-bottom: 0.8em;
@@ -26,18 +23,15 @@ html {
     margin-top: 0.3em;
 }
 
-
 #login_component h2 {
     text-align: center;
     font-weight: bold;
 }
 
-
 #login_component form {
     margin: 0 auto;
     width: 12em;
 }
-
 
 #login_submit
 {
@@ -46,10 +40,6 @@ html {
     color: white;
     border: none;
     padding-top: 2em;
-}
-
-#login_submit:hover {
-    background-color: #ff4b4b;
 }
 
 #login_error_message {
