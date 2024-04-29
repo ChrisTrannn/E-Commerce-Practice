@@ -1,10 +1,13 @@
 # team-sc
-[Project 1 Demo Video](https://www.youtube.com/watch?v=qQUlfw6wHYc)
-### Member Contributions:
-Subin Kim: Movie List Page, CSS, Jump Req\
-Chris Tran: Single Movie Page, Single Star Page, Jump Req
+[Project 2 Demo Video]()
+## Member Contributions:
+Subin Kim: Main Page (Search), Extend MovieList/Single Page, Shopping Cart\
+Chris Tran: Login Page, Main Page (Browse), Payment Page, Place Order Action 
+
+## Substring Matching Design
+-Used in MovieServlet.java for the Search Filtering (Title, Director, Star, Year)<br>
+-LIKE %here% (whatever is in 'here' allows prepending and appending<br>
+[How We Used Substring Matching (lines 110-133)](src/MoviesServlet.java)
+
 ### Extra:
 [AWS Deployment](http://54.67.7.111:8080/cs122b-s24-team-sc/movie-list.html)
-
--Creation of dev branch (testing branch before merging into main)
--Creation of task2-browse branch off of dev branch
