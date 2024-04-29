@@ -1,5 +1,5 @@
 # team-sc
-[Project 2 Demo Video]()
+[Project 2 Demo Video](https://www.youtube.com/watch?v=ugbN_BDZgs4&ab_channel=SubinLeeKim)
 ## Member Contributions:
 Subin Kim: Main Page (Search), Extend MovieList/Single Page, Shopping Cart\
 Chris Tran: Login Page, Main Page (Browse), Payment Page, Place Order Action 
