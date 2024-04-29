@@ -189,9 +189,8 @@ function decrementQuantity(movieId, title, price, quantity) {
 
 function deleteCartItem(movieId) {
     $.ajax({
-        url: "api/shopping-cart",
+        url: "api/shopping-cart?movieId=" + movieId,
         method: "DELETE",
-        data: {movieId: movieId},
         success: function (response) {
             console.log("Item deleted successfully:", response);
         },
