@@ -38,6 +38,7 @@ function getParameterByName(target) {
 
 function handleResult(resultData) {
     console.log("handleResult: populating movie info from resultData");
+    console.log(resultData);
     // change the title of the page to the movie name
     let movieTitle = jQuery("#movie_title");
     movieTitle.append(resultData[0]["title"]);
@@ -56,12 +57,37 @@ function handleResult(resultData) {
     // Iterate through resultData
     for (let i = 0; i < resultData.length; i++) {
         // Concatenate the HTML tags with resultData jsonObject
+        var price = (Math.random() * (25 - 5) + 5).toFixed(2);
         let rowHTML = "";
         rowHTML += "<tr>";
         rowHTML += "<td>" + resultData[i]["title"] + "</td>";
         rowHTML += "<td>" + resultData[i]["year"] + "</td>";
         rowHTML += "<td>" + resultData[i]["director"] + "</td>";
-        rowHTML += "<td>" + resultData[i]["genres"] + "</td>";
+
+        rowHTML += "<td>";
+        let genresData = resultData[i]["genres"].split(", ");
+        for (let k = 0; k < genresData.length; k++) {
+            let genreInfo = genresData[k].split(":");
+            if (genreInfo.length === 2) { // Check if the genre data is in the expected format
+                let genreId = genreInfo[0];
+                let genreName = genreInfo[1];
+                rowHTML += '<a href="movie-list.html?genre_id=' + genreId + '">' +
+                    genreName +
+                    '</a>';
+                // Add comma and space after each genre except for the last one
+                if (k < genresData.length - 1) {
+                    rowHTML += ', ';
+                }
+            } else {
+                // If the genre data is not in the expected format, simply display it
+                rowHTML += genresData[k];
+                if (k < genresData.length - 1) {
+                    rowHTML += ', ';
+                }
+            }
+        }
+        rowHTML += "</td>";
+
 
         // Add a link to single-star.html with id passed with GET url parameter
         rowHTML += "<td>";
@@ -72,12 +98,66 @@ function handleResult(resultData) {
         }
         rowHTML += "</td>";
         rowHTML += "<td>" + resultData[i]["rating"] + "</td>";
+        rowHTML += '<td><button class="addToCartButton" data-movie-id="' + resultData[i]["movie_id"] + '" data-title="' + resultData[i]["title"] + '" data-price="' + price + '">Add to Cart</button></td>';
         rowHTML += "</tr>";
 
         // Append the row created to the table body
         movieTableBodyElement.append(rowHTML);
     }
 }
+
+function addToCart(event) {
+    // Prevent the default form submission behavior
+    event.preventDefault();
+
+    // Retrieve the movie ID from the clicked button's data attribute
+    var movieId = getParameterByName('id');
+    var title = $(event.currentTarget).data("title");
+    var price = parseFloat($(event.currentTarget).data("price"));
+
+    console.log(movieId)
+    // Create the cart data object
+    var cartData = {
+        movieId: movieId,
+        title: title,
+        price: price,
+        quantity: 0,
+        quantityIncrement: 1
+    };
+
+    console.log(cartData);
+
+    $.ajax({
+        url: "api/shopping-cart",
+        method: "POST",
+        data: cartData,
+        success: function(resultDataString) {
+            // Parse the JSON response
+            console.log(resultDataString);
+            console.log("Item added to cart:", resultDataString);
+            alert('"' + title + '" added to cart!');
+        },
+        error: function(xhr, status, error) {
+            console.error("Error adding item to cart:", error);
+        }
+    });
+}
+
+$(document).ready(function() {
+    $(document).on("click", ".addToCartButton", addToCart);
+});
+
+
+$(function() {
+    // Get the previous page URL from sessionStorage
+    var previousPageURL = sessionStorage.getItem('previousPageURL');
+    console.log(previousPageURL);
+
+    $('#prevButtonMovie').click(function() {
+        console.log('Button clicked');
+        window.location.href = previousPageURL;
+    });
+});
 
 /**
  * Once this .js is loaded, following scripts will be executed by the browser\

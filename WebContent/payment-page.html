@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Information</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="payment-page.css">
+</head>
+<body>
+
+<!-- Navbar component -->
+<div id="navbar-place"></div>
+
+<!-- Payment form component -->
+<div id="payment_component">
+    <h2>Payment Information</h2>
+
+    <!-- the HTTP method is POST to avoid showing credit card information -->
+    <form id="payment_form" method="post" action="#">
+        <label>
+            <input name="card_first_name" placeholder="First Name" type="text">
+        </label>
+        <br>
+        <label>
+            <input name="card_last_name" placeholder="Last Name" type="text">
+        </label>
+        <br>
+        <label>
+            <input name="card_number" placeholder="Card Number" type="text">
+        </label>
+        <br>
+        <label>
+            <input id="card_expiration_date" name="card_expiration_date" type="date" placeholder="MM/DD/YYYY">
+        </label>
+        <br>
+        <label>
+            <div id="cart_total_price">Final Payment: </div>
+        </label>
+        <input id="place_order_button" type="submit" value="Place Order">
+    </form>
+
+    <!-- Error message will be displayed here -->
+    <div id="payment_error_message"></div>
+</div>
+
+<!-- Scripts loaded here -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="payment-page.js"></script>
+<script>
+    $(function(){
+        $('#navbar-place').load('navbar.html', function() {
+            // Load search.js after the content is loaded
+            $.getScript('search.js');
+        });
+    });
+</script>
+
+</body>
+</html>

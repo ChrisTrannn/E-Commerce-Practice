@@ -1,0 +1,55 @@
+* {
+    font-family: Verdana;
+}
+
+#payment_component {
+    background-color: white;
+    border-radius: 15px;
+    border: 1px solid black;
+    margin: 0 auto;
+    width: 35em;
+    padding-top: 2.5em;
+    padding-bottom: 2em;
+    margin-top: 5em;
+}
+
+#payment_component input {
+    border-radius: 10px;
+    margin-bottom: 0.8em;
+    padding: 0.7em;
+    margin-top: 0.3em;
+    width: 24em;
+}
+
+#payment_component h2 {
+    text-align: center;
+    font-weight: bold;
+}
+
+#payment_component form {
+    margin: 0 auto;
+    width: 24em;
+}
+
+#place_order_button
+{
+    width: 15em;
+    background-color: #ed3e3e;
+    color: white;
+    border: none;
+    padding-top: 2em;
+
+}
+
+#payment_error_message {
+    text-align: center;
+}
+
+#cart_total_price {
+    font-weight: bold;
+    margin: 0.3em 0em;
+}
+
+#place_order_button:hover {
+    background-color: #ff4b4b;
+}
