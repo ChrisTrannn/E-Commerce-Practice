@@ -111,10 +111,11 @@ function addToCart(event) {
     event.preventDefault();
 
     // Retrieve the movie ID from the clicked button's data attribute
-    var movieId = $(event.currentTarget).data("movie-id");
+    var movieId = getParameterByName('id');
     var title = $(event.currentTarget).data("title");
     var price = parseFloat($(event.currentTarget).data("price"));
 
+    console.log(movieId)
     // Create the cart data object
     var cartData = {
         movieId: movieId,
