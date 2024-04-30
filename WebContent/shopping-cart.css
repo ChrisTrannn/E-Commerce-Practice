@@ -1,0 +1,136 @@
+/* Styling for the row container */
+.row {
+    margin-top: 20px; /* space above the row */
+}
+
+/* Basic styling for the cart items */
+.cart-item {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    padding: 10px;
+    display: flex; /* using flex to manage the content inside each card */
+    flex-direction: column; /* stacking children vertically */
+    justify-content: space-between; /* space distribution between child elements */
+    transition: all 0.3s ease; /* Smooth transition for shadow and transform */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Initial subtle shadow */
+    margin-bottom: 20px; /* Space between cards */
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+#proceedToPaymentBtn {
+    background-color: #d9534f;
+    padding: 15px 30px;
+    font-size: 18px;
+    margin-bottom: 5px;
+    border:none;
+}
+
+#proceedToPaymentBtn:hover {
+    background-color: darkred;
+}
+
+.cart-item:hover {
+    box-shadow: 0 12px 24px rgba(0,0,0,0.2); /* Darker shadow for 3D effect */
+    transform: translateY(-5px); /* Moves the card up slightly */
+}
+
+/* Ensuring uniform height and spacing using flexbox on each column */
+.col {
+    display: flex;
+    flex: 1; /* each column takes equal width */
+    padding: 10px; /* spacing between columns */
+}
+
+/* Button and other elements spacing */
+button {
+    margin: 5px 0; /* vertical margin for buttons */
+}
+
+/* Ensuring all cards have a minimum height */
+.cart-item {
+    min-height: 250px;
+}
+
+.btn {
+    border-radius: 50px;  /* Fully rounded edges */
+    padding: 5px 15px;   /* Adjust padding to make buttons more proportional */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* subtle shadow */
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+}
+
+.btn:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15); /* More pronounced shadow on hover */
+    transform: translateY(-2px); /* Slightly raise the button */
+}
+
+.btn-outline-secondary {
+    color: #333;
+    border-color: #ccc;
+}
+
+.btn-outline-danger {
+    color: #d9534f;
+    border-color: #d43f3a;
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-danger:hover {
+    color: #fff; /* White text on hover */
+    background-color: #d9534f; /* Background color change on hover */
+}
+
+body {
+    font-family: 'Montserrat', sans-serif; /* Maintain the modern font */
+    color: #333; /* Dark gray for text - softer than black */
+    background-color: #f4f4f4; /* Very light gray for the background */
+    margin: 0;
+    padding: 0;
+    margin-bottom: 150px;
+}
+
+h1, h2, h3, h4 {
+    font-weight: 700; /* Bold weights for headings */
+    letter-spacing: 1px; /* Slightly spaced out letters */
+    margin-bottom: 10px; /* Spacing below headings */
+    color: #222; /* Slightly darker gray for headings */
+}
+
+.title-c {
+    text-align: center;
+    font-style: italic;
+}
+
+p, .cart-item {
+    font-weight: 400; /* Normal weight for regular text */
+    line-height: 1.6; /* Increased line-height for better readability */
+    color: #555; /* Medium gray for paragraph text */
+}
+
+button {
+    font-weight: 700;
+    color: #fff; /* White text on buttons */
+    background-color: #888; /* Medium gray for buttons */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #aaa; /* Lighter gray on hover for better interaction feedback */
+}
+
+.quantity-mov{
+    font-size: large;
+}
+
+.quantity {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.total {
+    font-size: large;
+}
