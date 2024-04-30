@@ -35,7 +35,10 @@ function displayCartItems(cartItems) {
         // Iterate over each item in the array
         cartItems['previousItems'].forEach(item => {
             const parsedItem = JSON.parse(item);
-            // Create a div to hold each cart item
+            // Create a column for each item
+            const colDiv = document.createElement("div");
+            colDiv.className = "col-sm-12 col-md-6 col-lg-4 mb-4";
+
             const itemDiv = document.createElement("div");
             itemDiv.className = "cart-item";
 
@@ -43,34 +46,41 @@ function displayCartItems(cartItems) {
 
             // Display title
             const titleDiv = document.createElement("h4");
-            titleDiv.textContent = `Title: ${parsedItem.title}`;
+            titleDiv.className = "title-c";
+            titleDiv.textContent = `${parsedItem.title}`;
             itemDiv.appendChild(titleDiv);
 
             // Display quantity with plus and minus buttons
             const quantityDiv = document.createElement("div");
+            quantityDiv.className = "quantity-mov";
             quantityDiv.textContent = "Quantity: ";
-            const minusButton = document.createElement("button");
 
+            const minusButton = document.createElement("button");
+            minusButton.className = "btn btn-outline-secondary";
+            minusButton.innerHTML = '<i class="fas fa-minus"></i>';
             minusButton.textContent = "-";
             minusButton.addEventListener("click", function() {
                 parsedItem.quantity--;
                 quantityDisplay.textContent = parsedItem.quantity;
-                totalPriceDiv.textContent = `Total Price: ${(parsedItem.price * parsedItem.quantity).toFixed(2)}`;
+                totalPriceDiv.textContent = `Total Price: $${(parsedItem.price * parsedItem.quantity).toFixed(2)}`;
                 decrementQuantity(parsedItem.movieId, parsedItem.title, parsedItem.price, parsedItem.quantity);
                 updateTotal();
             });
             quantityDiv.appendChild(minusButton);
+
             const quantityDisplay = document.createElement("span");
             quantityDisplay.className = "quantity";
-
             quantityDisplay.textContent = parsedItem.quantity;
             quantityDiv.appendChild(quantityDisplay);
+
             const plusButton = document.createElement("button");
+            plusButton.className = "btn btn-outline-secondary";
+            plusButton.innerHTML = '<i class="fas fa-plus"></i>';
             plusButton.textContent = "+";
             plusButton.addEventListener("click", function() {
                 parsedItem.quantity++;
                 quantityDisplay.textContent = parsedItem.quantity;
-                totalPriceDiv.textContent = `Total Price: ${(parsedItem.price * parsedItem.quantity).toFixed(2)}`;
+                totalPriceDiv.textContent = `Total Price: $${(parsedItem.price * parsedItem.quantity).toFixed(2)}`;
                 incrementQuantity(parsedItem.movieId, parsedItem.title, parsedItem.price, parsedItem.quantity);
                 updateTotal();
             });
@@ -80,6 +90,8 @@ function displayCartItems(cartItems) {
             // Display delete option
             const deleteButton = document.createElement("button");
             deleteButton.textContent = "Delete";
+            deleteButton.className = "btn btn-outline-danger";
+            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
             deleteButton.addEventListener("click", function() {
                 itemDiv.remove();
                 // Call a function to delete the item from the cart
@@ -90,16 +102,18 @@ function displayCartItems(cartItems) {
 
             // Display price of each movie
             const priceDiv = document.createElement("div");
-            priceDiv.textContent = `Price: ${parsedItem.price.toFixed(2)}`;
+            priceDiv.textContent = `Price: $${parsedItem.price.toFixed(2)}`;
             itemDiv.appendChild(priceDiv);
 
             // Display total price (price * quantity)
             const totalPriceDiv = document.createElement("div");
-            totalPriceDiv.textContent = `Total Price: ${(parsedItem.price * parsedItem.quantity).toFixed(2)}`;
+            totalPriceDiv.textContent = `Total Price: $${(parsedItem.price * parsedItem.quantity).toFixed(2)}`;
             itemDiv.appendChild(totalPriceDiv);
 
+            colDiv.appendChild(itemDiv)
+
             // Append the cart item div to the cart items container
-            cartItemsDiv.appendChild(itemDiv);
+            cartItemsDiv.appendChild(colDiv);
 
             // Add item's total price to the total
             total += parsedItem.price * parsedItem.quantity;
@@ -108,7 +122,8 @@ function displayCartItems(cartItems) {
         console.error("Invalid cart items format:", cartItems);
     }
     // Display total outside the loop
-    const totalDiv = document.createElement("div");
+    const totalDiv = document.createElement("h1");
+    totalDiv.className = "check-total";
     totalDiv.textContent = `Checkout Total: ${total.toFixed(2)}`;
     document.querySelector(".total").appendChild(totalDiv);
 
@@ -121,7 +136,7 @@ function updateTotal() {
     let total = 0;
     const totalPriceDivs = document.querySelectorAll(".cart-item > div:last-child");
     totalPriceDivs.forEach(div => {
-        const price = parseFloat(div.textContent.split(":")[1].trim());
+        const price = parseFloat(div.textContent.split("$")[1].trim());
         total += price;
     });
     const totalDiv = document.querySelector(".total");
