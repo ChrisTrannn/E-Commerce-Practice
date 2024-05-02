@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <title>Login Fablix</title>
   <link rel="stylesheet" href="login-page.css">
+  <script src='https://www.google.com/recaptcha/api.js' type="text/javascript"></script>
 </head>
 <body>
 
@@ -13,7 +14,7 @@
   <h2>Login to Fablix</h2>
 
   <!-- Set the method to POST to avoid showing the username/password in the URL The default action is disabled to allow your own implementation. -->
-  <form id="login_form" method="post" action="#">
+  <form id="login_form" method="post" action="form-recaptcha">
     <label><b>Username</b></label><br>
     <label>
       <input name="username" placeholder="Enter Username" type="text">
@@ -24,6 +25,7 @@
       <input name="password" placeholder="Enter Password" type="password">
     </label>
     <br>
+    <div class="g-recaptcha" data-sitekey="6LcFxc0pAAAAAE5YqbMV9UFT8D24cNmZaU9QwzvF"></div>
     <input id="login_submit" type="submit" value="Login">
   </form>
 
