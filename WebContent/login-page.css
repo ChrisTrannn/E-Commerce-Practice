@@ -10,7 +10,7 @@ html {
     background-color: white;
     border-radius: 15px;
     margin: 0 auto;
-    width: 23em;
+    width: 25em;
     padding-top: 1.5em;
     padding-bottom: 1.5em;
     margin-top: 15em;
@@ -19,8 +19,8 @@ html {
 #login_component input {
     border-radius: 10px;
     margin-bottom: 0.8em;
-    padding: 0.7em;
-    margin-top: 0.3em;
+    padding: 1em;
+    margin-top: 0.8em;
 }
 
 #login_component h2 {
@@ -39,7 +39,6 @@ html {
     background-color: #ed3e3e;
     color: white;
     border: none;
-    padding-top: 2em;
 }
 
 #login_error_message {
@@ -48,4 +47,12 @@ html {
 
 #login_submit:hover {
     background-color: #ff5c5c;
+}
+
+.g-recaptcha {
+    -webkit-transform:scale(0.69);
+    transform:scale(0.69);
+    -webkit-transform-origin:0 0;
+    transform-origin:0 0;
+    padding-top: 1.2em;
 }
