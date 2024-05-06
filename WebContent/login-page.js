@@ -1,5 +1,10 @@
 let login_form = $("#login_form");
 
+// helper function to reset the reCAPTCHA widget
+function refreshReCaptcha() {
+    grecaptcha.reset();
+}
+
 /**
  * Handle the data returned by LoginServlet
  * @param resultDataString jsonObject
@@ -19,6 +24,7 @@ function handleLoginResult(resultDataString) {
         console.log("show error message");
         console.log(resultDataJson["message"]);
         $("#login_error_message").text(resultDataJson["message"]);
+        refreshReCaptcha();
     }
 }
 
@@ -47,3 +53,4 @@ function submitLoginForm(formSubmitEvent) {
 
 // Bind the submit action of the form to a handler function
 login_form.submit(submitLoginForm);
+
