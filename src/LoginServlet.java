@@ -77,11 +77,23 @@ public class LoginServlet extends HttpServlet {
                     return;
                 }
             }
-
             // Login fail if there's no match in result set
+            // query the customers table and check if the username and password match
+            String query2 = "SELECT * from customers where email = ?";
+            PreparedStatement statement2 = conn.prepareStatement(query);
+            statement2.setString(1, username);
+            ResultSet rs2 = statement.executeQuery();
+
             JsonObject responseJsonObject = new JsonObject();
             responseJsonObject.addProperty("status", "fail");
-            responseJsonObject.addProperty("message", "incorrect username or password");
+
+            // if username doesn't exist in the database
+            if (!rs2.next()) {
+                responseJsonObject.addProperty("message", "user " + username + " doesn't exist");
+            } else {
+                responseJsonObject.addProperty("message", "incorrect password");
+            }
+
             request.getServletContext().log("Login failed");
             response.getWriter().write(responseJsonObject.toString());
         } catch (Exception e) {
