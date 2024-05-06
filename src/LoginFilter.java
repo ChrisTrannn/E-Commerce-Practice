@@ -31,7 +31,7 @@ public class LoginFilter implements Filter {
 
         // Redirect to login page if the "user" attribute doesn't exist in session
         if (httpRequest.getSession().getAttribute("user") == null) {
-            httpResponse.sendRedirect("login-page.html");
+            httpResponse.sendRedirect("/cs122b_s24_team_sc_war/login-page.html");
         } else {
             chain.doFilter(request, response);
         }
