@@ -3,8 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <title>Add Movie Page</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="add-movie-page.css">
 </head>
 <body>
-    <h3>Add Movie Page</h3>
+<!-- Navbar -->
+<div id="navbar-place"></div>
+
+<!-- Add movie form -->
+<div id="movie_component">
+    <h2>Add a movie</h2>
+
+    <!-- the HTTP method is POST to avoid showing credit card information -->
+    <form id="movie_form" method="post" action="#">
+        <label>
+            <input name="movie_title" placeholder="Title" type="text" required>
+        </label>
+        <br>
+        <label>
+            <input name="movie_year" placeholder="Year" type="number" required>
+        </label>
+        <br>
+        <label>
+            <input name="movie_director" placeholder="Director" type="text" required>
+        </label>
+        <br>
+        <label>
+            <input name="star_name" placeholder="Star Name" type="text" required>
+        </label>
+        <br>
+        <label>
+            <input name="star_birth_year" placeholder="Birth Year" type="number">
+        </label>
+        <br>
+        <label>
+            <input name="genre_name" placeholder="Genre Name" type="text" required>
+        </label>
+        <br>
+        <input id="movie_submit_button" type="submit" value="Submit">
+    </form>
+
+    <!-- Error message will be displayed here -->
+    <div id="movie_status_message"></div>
+</div>
+
+<!-- Load jQuery and Bootstrap JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<!-- Loading main.js file -->
+<script src="add-movie-page.js"></script>
+
+<!-- Loading navbar -->
+<script>
+    $(function(){
+        $('#navbar-place').load('navbar.html');
+    });
+</script>
 </body>
 </html>
