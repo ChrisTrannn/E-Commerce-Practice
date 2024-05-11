@@ -13,6 +13,9 @@
     <title>Employee Main Page</title>
 </head>
 <body>
+    <!-- Navbar -->
+    <div id="navbar-place"></div>
+
     <!-- Metadata Tables -->
     <div id="metadata_tables"></div>
 
@@ -24,5 +27,12 @@
 
     <!-- Loading main.js file -->
     <script src="main-page.js"></script>
+
+    <!-- Loading navbar -->
+    <script>
+        $(function(){
+            $('#navbar-place').load('navbar.html');
+        });
+    </script>
 </body>
 </html>
