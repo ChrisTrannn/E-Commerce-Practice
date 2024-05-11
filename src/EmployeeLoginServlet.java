@@ -4,6 +4,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jasypt.util.password.StrongPasswordEncryptor;
+
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -11,10 +13,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import org.jasypt.util.password.StrongPasswordEncryptor;
 
-@WebServlet(name = "LoginServlet", urlPatterns = "/api/login")
-public class LoginServlet extends HttpServlet {
+@WebServlet(name = "EmployeeLoginServlet", urlPatterns = "/_dashboard/api/employee-login")
+public class EmployeeLoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     // Create a dataSource which registered in web.
@@ -49,8 +50,8 @@ public class LoginServlet extends HttpServlet {
 
         // check if the username and password, match email and password column from customers table
         try (Connection conn = dataSource.getConnection()) {
-            // query the customers table and check if the username and password match
-            String query = "SELECT * from customers where email = ?";
+            // query the employees table and check if the username and password match
+            String query = "SELECT * from employees where email = ?";
             PreparedStatement statement = conn.prepareStatement(query);
             statement.setString(1, username);
             ResultSet rs = statement.executeQuery();
@@ -67,7 +68,6 @@ public class LoginServlet extends HttpServlet {
                 if (email.equals(username) && decryptedPasswordBool) {
                     // set this user into the session, set customerId into session as well
                     request.getSession().setAttribute("user", new User(username));
-                    request.getSession().setAttribute("customerId", rs.getString("id"));
 
                     // send success message
                     JsonObject responseJsonObject = new JsonObject();
@@ -77,9 +77,10 @@ public class LoginServlet extends HttpServlet {
                     return;
                 }
             }
+
             // Login fail if there's no match in result set
-            // query the customers table and check if the username and password match
-            String query2 = "SELECT * from customers where email = ?";
+            // query the employee table and check if the username and password match
+            String query2 = "SELECT * from employees where email = ?";
             PreparedStatement statement2 = conn.prepareStatement(query);
             statement2.setString(1, username);
             ResultSet rs2 = statement2.executeQuery();

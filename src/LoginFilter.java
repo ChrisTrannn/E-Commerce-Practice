@@ -22,6 +22,16 @@ public class LoginFilter implements Filter {
 
         System.out.println("LoginFilter: " + httpRequest.getRequestURI());
 
+        // redirect _dashboard to employee login page
+        if (isEmployeeLoginEntryPoint(httpRequest.getRequestURI())) {
+            if (httpRequest.getSession().getAttribute("user") != null) {
+                httpResponse.sendRedirect("/cs122b_s24_team_sc_war/_dashboard/main-page.html");
+            } else {
+                httpResponse.sendRedirect("/cs122b_s24_team_sc_war/_dashboard/login-page.html");
+            }
+            return;
+        }
+
         // Check if this URL is allowed to access without logging in
         if (this.isUrlAllowedWithoutLogin(httpRequest.getRequestURI())) {
             // Keep default action: pass along the filter chain
@@ -46,11 +56,23 @@ public class LoginFilter implements Filter {
         return allowedURIs.stream().anyMatch(requestURI.toLowerCase()::endsWith);
     }
 
+    // Check if the requested URL is the entry point for employee login
+    private boolean isEmployeeLoginEntryPoint(String requestURI) {
+        return requestURI.equals("/cs122b_s24_team_sc_war/_dashboard");
+    }
+
     public void init(FilterConfig fConfig) {
+        // allowed urls for users
         allowedURIs.add("login-page.html");
         allowedURIs.add("login-page.js");
         allowedURIs.add("login-page.css");
         allowedURIs.add("api/login");
+
+        // allowed urls for employees
+        allowedURIs.add("/_dashboard/login-page.html");
+        allowedURIs.add("/_dashboard/login-page.js");
+        allowedURIs.add("/_dashboard/login-page.css");
+        allowedURIs.add("/_dashboard/api/employee-login");
     }
 
     public void destroy() {
