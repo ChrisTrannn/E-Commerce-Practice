@@ -3,9 +3,7 @@ function handleMetadataResult(resultData) {
     console.log("handleMetadataResult: populating genres");
     console.log(resultData);
 
-    // create a table for each item in teh resultData
-    // json object has table_name, and columns where column has json objects with two attributes: attribute and type
-    // add it to the id="metadata_tables" div create teh tables yourself
+    // create tables with the metadata and append to the metadata_tables div
     let metadata_tables = jQuery("#metadata_tables");
 
     for (let i = 0; i < resultData.length; i++) {
