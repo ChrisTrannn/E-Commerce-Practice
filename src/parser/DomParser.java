@@ -8,9 +8,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
@@ -21,6 +19,18 @@ public class DomParser {
     List<GenreAndMovie> genresInMovies = new ArrayList<>();
     List<StarAndMovie> starsInMovies = new ArrayList<>();
     List<Star> stars = new ArrayList<>();
+    Set<String> processedFids = new HashSet<>();
+    int movieBatchSize = 0;
+    int starBatchSize = 0;
+    int starMovieBatchSize = 0;
+    int genreBatchSize = 0;
+    int genreMovieBatchSize = 0;
+
+    int inconsistencyCount = 0;
+    int duplicateMovieCount = 0;
+    int duplicateStarCount = 0;
+    int starsNotFound = 0;
+    int moviesNotFound = 0;
 
     Document moviesDom;
     Document castsDom;
@@ -39,6 +49,17 @@ public class DomParser {
 
         insertDataIntoDatabase();
 
+        System.out.println("Report:");
+        System.out.println("Inserted " + movieBatchSize + " movies");
+        System.out.println("Inserted " + starBatchSize + " stars");
+        System.out.println("Inserted " + starMovieBatchSize + " stars_in_movies");
+        System.out.println("Inserted " + genreBatchSize + " genres");
+        System.out.println("Inserted " + genreMovieBatchSize + " genres_in_movies");
+        System.out.println("Total inconsistencies: " + inconsistencyCount);
+        System.out.println("Total duplicate movies: " + duplicateMovieCount);
+        System.out.println("Total duplicate stars: " + duplicateStarCount);
+        System.out.println("Total stars not found: " + starsNotFound);
+        System.out.println("Total movies not found: " + moviesNotFound);
     }
 
     private Document parseXmlFile(String filePath) {
@@ -91,10 +112,18 @@ public class DomParser {
 
                 for (int k = 0; k < movieList.getLength(); k++) {
                     Element movieElement = (Element) movieList.item(k);
-                    Movie movie = parseMovie(movieElement);
-                    System.out.println(movie);
-                    if (movie != null) {
-                        movies.add(movie);
+                    String fid = getTextValue(movieElement, "fid");
+
+                    if (!processedFids.contains(fid)) {
+                        Movie movie = parseMovie(movieElement);
+                        if (movie != null) {
+                            System.out.println(movie);
+                            movies.add(movie);
+                            processedFids.add(fid);  // Add fid to the set
+                        }
+                    } else {
+                        System.out.println("Skipping duplicate movie with fid: " + fid);
+                        duplicateMovieCount++;
                     }
                 }
             }
@@ -119,6 +148,9 @@ public class DomParser {
                 StarAndMovie starMovie = new StarAndMovie(stageName, filmId);
                 starsInMovies.add(starMovie);
                 System.out.println("Star in Movie: " + filmId + ", " + stageName);
+            } else {
+                System.out.println("Inconsistency found in cast: Element Name: " + castElement.getTagName() + "Node val: " + stageName);
+                inconsistencyCount++;
             }
         }
         System.out.println("Total stars in movies parsed: " + starsInMovies.size());
@@ -141,8 +173,13 @@ public class DomParser {
                     // new star if not found
                     star = new Star(stageName, birthYear);
                     stars.add(star);
+                } else {
+                    System.out.println("Duplicate star found: " + stageName);
+                    duplicateStarCount++;
                 }
-                System.out.println("Star: " + stageName + ", Birth Year: " + birthYear);
+            } else {
+                System.out.println("Inconsistency found in actor: Element Name: " + actorElement.getTagName() + "Node val: " + stageName);
+                inconsistencyCount++;
             }
         }
         System.out.println("Total stars parsed: " + stars.size());
@@ -169,22 +206,30 @@ public class DomParser {
     private Movie parseMovie(Element element) {
 
         String id = getTextValue(element, "fid");
+        if (id == null || id.trim().isEmpty()) {
+            System.out.println("Skipping movie with no ID.");
+            inconsistencyCount++;
+            return null;
+        }
 
         String title = getTextValue(element, "t");
         if (title == null || title.trim().isEmpty()) {
             System.out.println("Skipping movie with no title, ID: " + id);
+            inconsistencyCount++;
             return null;
         }
 
         int year = getIntValue(element, "year");
         if (year == -1) {
             System.out.println("Skipping movie with invalid year: " + title);
+            inconsistencyCount++;
             return null;
         }
 
         String director = getTextValue(element, "dirn");
         if (director == null || director.trim().isEmpty() || director.startsWith("UnYear")) {
             System.out.println("Skipping movie with invalid director, ID: " + id);
+            inconsistencyCount++;
             return null;
         }
 
@@ -213,6 +258,9 @@ public class DomParser {
             if (!genre.isEmpty()) {
                 genre = GenreMapping.genreMapping.getOrDefault(genre, genre);
                 genres.add(new Genre(genre));
+            } else {
+                System.out.println("Inconsistency found in genre: Element Name: " + genreElement.getTagName() + "Node val: " + genre);
+                inconsistencyCount++;
             }
         }
         return genres;
@@ -245,11 +293,19 @@ public class DomParser {
         PreparedStatement psInsertGenre = null;
         PreparedStatement psInsertGenreMovie = null;
 
+        BufferedWriter movieWriter = null;
+        BufferedWriter starWriter = null;
+        BufferedWriter starMovieWriter = null;
+        BufferedWriter genreWriter = null;
+        BufferedWriter genreMovieWriter = null;
+
         String sqlInsertMovie = "INSERT INTO movies (id, title, year, director) VALUES (?, ?, ?, ?)";
-        String sqlInsertStar = "INSERT INTO stars (name, birthYear) VALUES (?, ?)";
-        String sqlInsertStarMovie = "INSERT INTO stars_in_movies (starName, movieId) VALUES (?, ?)";
+        String sqlInsertStar = "INSERT INTO stars (id, name, birthYear) VALUES (?, ?, ?)";
+        String sqlInsertStarMovie = "INSERT INTO stars_in_movies (starId, movieId) VALUES (?, ?)";
         String sqlInsertGenre = "INSERT INTO genres (name) VALUES (?)";
         String sqlInsertGenreMovie = "INSERT INTO genres_in_movies (genreId, movieId) VALUES (?, ?)";
+
+        Statement stmtFetchGenres = null;
 
         try {
             // Load the MySQL driver
@@ -264,67 +320,141 @@ public class DomParser {
             psInsertStarMovie = conn.prepareStatement(sqlInsertStarMovie);
             psInsertGenre = conn.prepareStatement(sqlInsertGenre, Statement.RETURN_GENERATED_KEYS);
             psInsertGenreMovie = conn.prepareStatement(sqlInsertGenreMovie);
+            stmtFetchGenres = conn.createStatement();
+
+
+            /*
+            movieWriter = new BufferedWriter(new FileWriter("movies_batch.log"));
+            starWriter = new BufferedWriter(new FileWriter("stars_batch.log"));
+            starMovieWriter = new BufferedWriter(new FileWriter("stars_in_movies_batch.log"));
+            genreWriter = new BufferedWriter(new FileWriter("genres_batch.log"));
+            genreMovieWriter = new BufferedWriter(new FileWriter("genres_in_movies_batch.log"));
+
+*/
+
+            // Fetch existing genres
+            Set<String> existingGenres = new HashSet<>();
+            ResultSet rsGenres = stmtFetchGenres.executeQuery("SELECT name FROM genres");
+            while (rsGenres.next()) {
+                existingGenres.add(rsGenres.getString("name"));
+            }
 
             // Insert movies
+            Set<String> insertedMovieIds = new HashSet<>();
             for (Movie movie : movies) {
                 psInsertMovie.setString(1, movie.getId());
                 psInsertMovie.setString(2, movie.getTitle());
                 psInsertMovie.setInt(3, movie.getYear());
                 psInsertMovie.setString(4, movie.getDirector());
                 psInsertMovie.addBatch();
+                //movieWriter.write("Inserting movie: " + movie.getId() + ", Title: " + movie.getTitle() + "\n");
+                insertedMovieIds.add(movie.getId());
+                movieBatchSize++;
             }
+
+            psInsertMovie.executeBatch();
+            System.out.println("Movies inserted. Batch size: " + movieBatchSize);
 
             // Insert stars
+            Map<String, String> starNameToIdMap = new HashMap<>();
             for (Star star : stars) {
-                psInsertStar.setString(1, star.getName());
+                String starId = generateUniqueId(star.getName());
+                psInsertStar.setString(1, starId);
+                psInsertStar.setString(2, star.getName());
                 if (star.getDob() != null) {
-                    psInsertStar.setInt(2, star.getDob());
+                    psInsertStar.setInt(3, star.getDob());
                 } else {
-                    psInsertStar.setNull(2, Types.INTEGER);
+                    psInsertStar.setNull(3, Types.INTEGER);
                 }
+                //System.out.println("Inserting star: " + starId + ", Name: " + star.getName());
+                //starWriter.write("Inserting star: " + starId + ", Name: " + star.getName() + "\n");
                 psInsertStar.addBatch();
+                starNameToIdMap.put(star.getName(), starId);
+                starBatchSize++;
             }
 
-            // Insert genres
-            for (Genre genre : genres) {
-                psInsertGenre.setString(1, genre.getGenre());
-                psInsertGenre.addBatch();
-            }
-
-            // Execute batches for movies, stars, and genres
-            psInsertMovie.executeBatch();
             psInsertStar.executeBatch();
-            psInsertGenre.executeBatch();
+            System.out.println("Stars inserted. Batch size: " + starBatchSize);
 
-            // Get generated keys for genres and create a map
             Map<String, Integer> genreNameToIdMap = new HashMap<>();
+            for (Genre genre : genres) {
+                if (!existingGenres.contains(genre.getGenre())) {
+                    psInsertGenre.setString(1, genre.getGenre());
+                    //genreWriter.write("Inserting genre: " + genre.getGenre() + "\n");
+                    psInsertGenre.addBatch();
+                    genreBatchSize++;
+                    existingGenres.add(genre.getGenre());
+                } else {
+                    System.out.println("Skipping existing genre: " + genre.getGenre());
+                }
+            }
+
+            psInsertGenre.executeBatch();
+            System.out.println("Genres inserted. Batch size: " + genreBatchSize);
+
             ResultSet generatedKeys = psInsertGenre.getGeneratedKeys();
+
+            int index = 0;
             while (generatedKeys.next()) {
                 int genreId = generatedKeys.getInt(1);
-                String genreName = generatedKeys.getString(2);
-                genreNameToIdMap.put(genreName, genreId);
+                //System.out.println("Generated Key [" + index + "]: Genre ID = " + genreId);
+                if (index < genres.size()) {
+                    Genre genre = (Genre) genres.toArray()[index];
+                    genreNameToIdMap.put(genre.getGenre(), genreId);
+                    //System.out.println("Mapping genre: " + genre.getGenre() + " to ID: " + genreId);
+                    index++;
+                }
             }
 
             // Insert stars_in_movies
+            Set<String> starMoviePairs = new HashSet<>();
             for (StarAndMovie starMovie : starsInMovies) {
-                psInsertStarMovie.setString(1, starMovie.getStageName());
-                psInsertStarMovie.setString(2, starMovie.getMovieId());
-                psInsertStarMovie.addBatch();
+                String starId = starNameToIdMap.get(starMovie.getStageName());
+                String movieId = starMovie.getMovieId();
+                String pair = starId + "-" + movieId;
+                if (starId == null) {
+                    //System.out.println("Warning: No ID found for star: " + starMovie.getStageName());
+                    //starMovieWriter.write("Warning: No ID found for star: " + starMovie.getStageName() + "\n");
+                    starsNotFound++;
+                } else if (insertedMovieIds.contains(movieId) && !starMoviePairs.contains(pair)) {
+                    psInsertStarMovie.setString(1, starId);
+                    psInsertStarMovie.setString(2, movieId);
+                    //System.out.println("Linking star: " + starId + " to movie: " + movieId);
+                    //starMovieWriter.write("Linking star: " + starId + " to movie: " + movieId + "\n");
+                    psInsertStarMovie.addBatch();
+                    starMoviePairs.add(pair);
+                    starMovieBatchSize++;
+                } else if (!insertedMovieIds.contains(movieId)) {
+                    //System.out.println("Skipping linking star to non-existent movie: " + movieId);
+                    //starMovieWriter.write("Skipping linking star to non-existent movie: " + movieId + "\n");
+                    moviesNotFound++;
+                } else {
+                    //System.out.println("Duplicate star-movie pair: " + pair + " skipped.");
+                    //starMovieWriter.write("Duplicate star-movie pair: " + pair + " skipped.\n");
+                    duplicateMovieCount++;
+                }
             }
+            // Execute batches for relationships
+            psInsertStarMovie.executeBatch();
+            System.out.println("Stars in movies inserted. Batch size: " + starMovieBatchSize);
 
             // Insert genres_in_movies
+            Set<String> genreMoviePairs = new HashSet<>();
             for (GenreAndMovie genreMovie : genresInMovies) {
                 Integer genreId = genreNameToIdMap.get(genreMovie.getGenreId());
-                if (genreId != null) {
+                String pair = genreId + "-" + genreMovie.getMovieId();
+                if (genreId != null && !genreMoviePairs.contains(pair)) {
                     psInsertGenreMovie.setInt(1, genreId);
                     psInsertGenreMovie.setString(2, genreMovie.getMovieId());
+                    //genreMovieWriter.write("Linking genre ID: " + genreId + " to movie: " + genreMovie.getMovieId() + "\n");
                     psInsertGenreMovie.addBatch();
+                    genreMoviePairs.add(pair);
+                    genreMovieBatchSize++;
                 }
             }
 
-            // Execute batches for relationships
-            psInsertStarMovie.executeBatch();
             psInsertGenreMovie.executeBatch();
+            System.out.println("Genre in movies inserted. Batch size: " + genreMovieBatchSize);
 
             // Commit transactions
             conn.commit();
@@ -351,6 +481,14 @@ public class DomParser {
             }
         }
     }
+
+    private String generateUniqueId(String name) {
+        // Generate hash and ensure it fits within VARCHAR(10)
+        String hash = Integer.toHexString(name.hashCode());
+        //System.out.println("Generated hash: " + hash + " Length: " + hash.length());
+        return hash.length() > 10 ? hash.substring(0, 10) : String.format("%10s", hash).replace(' ', '0');
+    }
+
 
 
         public static void main(String[] args) {
