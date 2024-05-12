@@ -2,3 +2,6 @@
 *.iml
 target/
 .DS_Store
+src/parser/stanford-movies/actors63.xml
+casts124.xml
+mains243.xml
