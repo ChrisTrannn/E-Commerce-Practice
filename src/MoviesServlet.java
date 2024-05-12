@@ -95,7 +95,7 @@ public class MoviesServlet extends HttpServlet {
                     "     WHERE sm.movieId = m.id) AS movie_count " +
                     "FROM " +
                     "    movies AS m " +
-                    "INNER JOIN " +
+                    "LEFT JOIN " +
                     "    ratings AS r ON m.id = r.movieId " +
                     "INNER JOIN " +
                     "    genres_in_movies AS gm ON m.id = gm.movieId " +
