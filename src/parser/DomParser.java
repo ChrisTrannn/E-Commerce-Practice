@@ -117,12 +117,12 @@ public class DomParser {
                     if (!processedFids.contains(fid)) {
                         Movie movie = parseMovie(movieElement);
                         if (movie != null) {
-                            System.out.println(movie);
+//                            System.out.println(movie);
                             movies.add(movie);
                             processedFids.add(fid);  // Add fid to the set
                         }
                     } else {
-                        System.out.println("Skipping duplicate movie with fid: " + fid);
+//                        System.out.println("Skipping duplicate movie with fid: " + fid);
                         duplicateMovieCount++;
                     }
                 }
@@ -147,9 +147,9 @@ public class DomParser {
                 stageName = cleanName(stageName);
                 StarAndMovie starMovie = new StarAndMovie(stageName, filmId);
                 starsInMovies.add(starMovie);
-                System.out.println("Star in Movie: " + filmId + ", " + stageName);
+//                System.out.println("Star in Movie: " + filmId + ", " + stageName);
             } else {
-                System.out.println("Inconsistency found in cast: Element Name: " + castElement.getTagName() + "Node val: " + stageName);
+//                System.out.println("Inconsistency found in cast: Element Name: " + castElement.getTagName() + "Node val: " + stageName);
                 inconsistencyCount++;
             }
         }
@@ -239,13 +239,13 @@ public class DomParser {
 
         for (Genre genre : movieGenres) {
             GenreAndMovie genreMovie = new GenreAndMovie(genre.getGenre(), id);
+            System.out.println(genreMovie);
             genresInMovies.add(genreMovie);
             genres.add(genre);
         }
 
         return movie;
     }
-
 
     private List<Genre> parseGenres(Element filmElement) {
         List<Genre> genres = new ArrayList<>();
@@ -254,12 +254,12 @@ public class DomParser {
         for (int i = 0; i < genresList.getLength(); i++) {
             Element genreElement = (Element) genresList.item(i);
             String genre = genreElement.getTextContent().trim();
-
             if (!genre.isEmpty()) {
                 genre = GenreMapping.genreMapping.getOrDefault(genre, genre);
+
                 genres.add(new Genre(genre));
             } else {
-                System.out.println("Inconsistency found in genre: Element Name: " + genreElement.getTagName() + "Node val: " + genre);
+//                System.out.println("Inconsistency found in genre: Element Name: " + genreElement.getTagName() + "Node val: " + genre);
                 inconsistencyCount++;
             }
         }
@@ -334,8 +334,13 @@ public class DomParser {
 
             // Fetch existing genres
             Set<String> existingGenres = new HashSet<>();
-            ResultSet rsGenres = stmtFetchGenres.executeQuery("SELECT name FROM genres");
+            Map<String, Integer> genreNameToIdMap = new HashMap<>();
+            ResultSet rsGenres = stmtFetchGenres.executeQuery("SELECT id, name FROM genres");
             while (rsGenres.next()) {
+                int id = rsGenres.getInt("id");
+                String name = rsGenres.getString("name");
+                System.out.println("id: " + id + " name: " + name);
+                genreNameToIdMap.put(name, id);
                 existingGenres.add(rsGenres.getString("name"));
             }
 
@@ -375,13 +380,15 @@ public class DomParser {
 
             psInsertStar.executeBatch();
             System.out.println("Stars inserted. Batch size: " + starBatchSize);
+            List<String> addedGenres = new ArrayList<>();
 
-            Map<String, Integer> genreNameToIdMap = new HashMap<>();
+            // insert new genres
             for (Genre genre : genres) {
                 if (!existingGenres.contains(genre.getGenre())) {
                     psInsertGenre.setString(1, genre.getGenre());
                     //genreWriter.write("Inserting genre: " + genre.getGenre() + "\n");
                     psInsertGenre.addBatch();
+                    addedGenres.add(genre.getGenre());
                     genreBatchSize++;
                     existingGenres.add(genre.getGenre());
                 } else {
@@ -392,18 +399,15 @@ public class DomParser {
             psInsertGenre.executeBatch();
             System.out.println("Genres inserted. Batch size: " + genreBatchSize);
 
+            // get generated keys for new genres
             ResultSet generatedKeys = psInsertGenre.getGeneratedKeys();
-
             int index = 0;
             while (generatedKeys.next()) {
                 int genreId = generatedKeys.getInt(1);
-                //System.out.println("Generated Key [" + index + "]: Genre ID = " + genreId);
-                if (index < genres.size()) {
-                    Genre genre = (Genre) genres.toArray()[index];
-                    genreNameToIdMap.put(genre.getGenre(), genreId);
-                    //System.out.println("Mapping genre: " + genre.getGenre() + " to ID: " + genreId);
-                    index++;
-                }
+                String genreName = addedGenres.get(index);
+                genreNameToIdMap.put(genreName, genreId);
+                System.out.println("Mapping Genre: " + genreName + " to ID: " + genreId);
+                index++;
             }
 
             // Insert stars_in_movies
@@ -446,7 +450,8 @@ public class DomParser {
                 if (genreId != null && !genreMoviePairs.contains(pair)) {
                     psInsertGenreMovie.setInt(1, genreId);
                     psInsertGenreMovie.setString(2, genreMovie.getMovieId());
-                    //genreMovieWriter.write("Linking genre ID: " + genreId + " to movie: " + genreMovie.getMovieId() + "\n");
+                    //System.out.println("Linking genre ID: " + genreId + " to movie: " + genreMovie.getMovieId());
+                            //genreMovieWriter.write("Linking genre ID: " + genreId + " to movie: " + genreMovie.getMovieId() + "\n");
                     psInsertGenreMovie.addBatch();
                     genreMoviePairs.add(pair);
                     genreMovieBatchSize++;
@@ -486,7 +491,7 @@ public class DomParser {
         // Generate hash and ensure it fits within VARCHAR(10)
         String hash = Integer.toHexString(name.hashCode());
         //System.out.println("Generated hash: " + hash + " Length: " + hash.length());
-        return hash.length() > 10 ? hash.substring(0, 10) : String.format("%10s", hash).replace(' ', '0');
+        return hash.length() > 8 ? hash.substring(0, 8) : String.format("%8s", hash).replace(' ', '0');
     }
 
 
