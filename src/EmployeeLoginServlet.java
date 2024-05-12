@@ -66,8 +66,9 @@ public class EmployeeLoginServlet extends HttpServlet {
 
                 // Login success if there's a match
                 if (email.equals(username) && decryptedPasswordBool) {
-                    // set this user into the session, set customerId into session as well
+                    // set this user into the session
                     request.getSession().setAttribute("user", new User(username));
+                    request.getSession().setAttribute("isEmployee", true);
 
                     // send success message
                     JsonObject responseJsonObject = new JsonObject();

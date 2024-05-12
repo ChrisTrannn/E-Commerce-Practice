@@ -25,7 +25,12 @@ public class LoginFilter implements Filter {
         // redirect _dashboard to employee login page
         if (isEmployeeLoginEntryPoint(httpRequest.getRequestURI())) {
             if (httpRequest.getSession().getAttribute("user") != null) {
-                httpResponse.sendRedirect("/cs122b_s24_team_sc_war/_dashboard/main-page.html");
+                if (httpRequest.getSession().getAttribute("isEmployee") != null) {
+                    chain.doFilter(request, response);
+                    return;
+                } else {
+                    httpResponse.sendRedirect("/cs122b_s24_team_sc_war/main-page.html");
+                }
             } else {
                 httpResponse.sendRedirect("/cs122b_s24_team_sc_war/_dashboard/login-page.html");
             }
@@ -43,7 +48,17 @@ public class LoginFilter implements Filter {
         if (httpRequest.getSession().getAttribute("user") == null) {
             httpResponse.sendRedirect("/cs122b_s24_team_sc_war/login-page.html");
         } else {
-            chain.doFilter(request, response);
+            // isEmployee attribute is set, user can access employee dashboard
+            // if isEmployee attribute is not set, redirect to main-page.html
+            if (httpRequest.getSession().getAttribute("isEmployee") != null) {
+                chain.doFilter(request, response);
+            } else {
+                if (httpRequest.getRequestURI().contains("/_dashboard")) {
+                    httpResponse.sendRedirect("/cs122b_s24_team_sc_war/main-page.html");
+                } else {
+                    chain.doFilter(request, response);
+                }
+            }
         }
     }
 
