@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Enumeration;
@@ -54,9 +55,6 @@ public class MoviesServlet extends HttpServlet {
 
         // Get a connection from dataSource and let resource manager close the connection after usage.
         try (Connection conn = dataSource.getConnection()) {
-            // Declare our statement
-            Statement statement = conn.createStatement();
-
             String title = request.getParameter("title");
             String year = request.getParameter("year");
             String director = request.getParameter("director");
@@ -109,26 +107,26 @@ public class MoviesServlet extends HttpServlet {
 
             // add filtering conditions
             if (title != null && !title.isEmpty()) {
-                query += " AND m.title LIKE '%" + title + "%'";
+                query += " AND m.title LIKE ?";
             }
             if (year != null && !year.isEmpty()) {
-                query += " AND m.year = " + year;
+                query += " AND m.year = ?";
             }
             if (director != null && !director.isEmpty()) {
-                query += " AND m.director LIKE '%" + director + "%'";
+                query += " AND m.director LIKE ?";
             }
             if (starName != null && !starName.isEmpty()) {
-                query += " AND s.name LIKE '%" + starName + "%'";
+                query += " AND s.name LIKE ?";
             }
             if (genre_id != null && !genre_id.isEmpty()) {
-                query += " AND g.id = " + genre_id;
+                query += " AND g.id = ?";
             }
             if (title_id != null && !title_id.isEmpty()) {
                 // Handle the '*' case: match titles that start with non-alphanumeric characters
                 if (title_id.equals("*")) {
                     query += " AND m.title REGEXP '^[^a-zA-Z0-9]'";
                 } else {
-                    query += " AND m.title LIKE '" + title_id + "%'";
+                    query += " AND m.title LIKE ?";
                 }
             }
 
@@ -164,14 +162,39 @@ public class MoviesServlet extends HttpServlet {
             }
 
             int offset = (pageNum - 1) * perPage;
-            query += " LIMIT " + perPage + " OFFSET " + offset + ";";
+            query += " LIMIT ? OFFSET ?;";
             System.out.println(Integer.toString(pageNum) + ' ' + Integer.toString(perPage));
+
+            PreparedStatement statement = conn.prepareStatement(query);
+
+
+            int parameterIndex = 1;
+            if (title != null && !title.isEmpty()) {
+                statement.setString(parameterIndex++, "%" + title + "%");
+            }
+            if (year != null && !year.isEmpty()) {
+                statement.setInt(parameterIndex++, Integer.parseInt(year));
+            }
+            if (director != null && !director.isEmpty()) {
+                statement.setString(parameterIndex++, "%" + director + "%");
+            }
+            if (starName != null && !starName.isEmpty()) {
+                statement.setString(parameterIndex++, "%" + starName + "%");
+            }
+            if (genre_id != null && !genre_id.isEmpty()) {
+                statement.setInt(parameterIndex++, Integer.parseInt(genre_id));
+            }
+            if (title_id != null && !title_id.isEmpty() && !title_id.equals("*")) {
+                statement.setString(parameterIndex++, title_id + "%");
+            }
+            statement.setInt(parameterIndex++, perPage);
+            statement.setInt(parameterIndex, offset);
 
             // print the query
             System.out.println("Query: " + query);
 
             // Perform the query
-            ResultSet rs = statement.executeQuery(query);
+            ResultSet rs = statement.executeQuery();
 
             // Create a JsonArray to hold the data we retrieve from rs
             JsonArray jsonArray = new JsonArray();

@@ -140,6 +140,7 @@ public class GenreMapping {
         genreMapping.put("Draam", "Drama");
         genreMapping.put("Actn", "Action");
         genreMapping.put("Adctx", "Adventure");
+        genreMapping.put("Homo", "Adventure");
         genreMapping.put("Dram", "Drama");
         genreMapping.put("BiopP", "Biography");
         genreMapping.put("BioP", "Biography");
@@ -159,6 +160,6 @@ public class GenreMapping {
         genreMapping.put("txx", "Silent");
         genreMapping.put("verite", "Experimental");
         genreMapping.put("Art Video", "Experimental");
-        genreMapping.put("anti-Dram", "Anti-Drama");
+        genreMapping.put("anti-Dram", "Drama");
     }
 }
