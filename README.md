@@ -53,6 +53,6 @@ in our existing column genres. We decided to create a mapping class that filtere
 5. Employees could access Customer features, but Customers cannot access Employees
 
 ### Extra:
-[AWS Deployment](https://54.176.4.206:8443/cs122b-s24-team-sc/login-page.html)
+[AWS Deployment](https://54.176.86.219:8443/cs122b-s24-team-sc/login-page.html)
 
 ## Main branch for project 3
