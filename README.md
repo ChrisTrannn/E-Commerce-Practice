@@ -1,5 +1,5 @@
 # team-sc
-[Project 3 Demo Video](https://www.youtube.com/watch?v=ugbN_BDZgs4&ab_channel=SubinLeeKim)
+[Project 3 Demo Video](https://www.youtube.com/watch?v=RJ2cYUDdCDg)
 ## Member Contributions:
 Subin Kim: Prepared Statements, Adding HTTPS, Importing large XML data files into the Fabflix database \
 Chris Tran: Adding reCAPTCHA, Use Encrypted Password, Implementing a Dashboard using Stored Procedure 
@@ -53,6 +53,6 @@ in our existing column genres. We decided to create a mapping class that filtere
 5. Employees could access Customer features, but Customers cannot access Employees
 
 ### Extra:
-[AWS Deployment](https://54.177.200.26:8443/cs122b-s24-team-sc/login-page.html)
+[AWS Deployment](https://54.176.4.206:8443/cs122b-s24-team-sc/login-page.html)
 
 ## Main branch for project 3
