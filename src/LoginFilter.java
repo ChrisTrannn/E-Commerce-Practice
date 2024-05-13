@@ -29,10 +29,10 @@ public class LoginFilter implements Filter {
                     chain.doFilter(request, response);
                     return;
                 } else {
-                    httpResponse.sendRedirect("/cs122b-s24-team-sc/main-page.html");
+                    httpResponse.sendRedirect("/cs122b_s24_team_sc_war/main-page.html");
                 }
             } else {
-                httpResponse.sendRedirect("/cs122b-s24-team-sc/_dashboard/login-page.html");
+                httpResponse.sendRedirect("/cs122b_s24_team_sc_war/_dashboard/login-page.html");
             }
             return;
         }
@@ -46,7 +46,7 @@ public class LoginFilter implements Filter {
 
         // Redirect to login page if the "user" attribute doesn't exist in session
         if (httpRequest.getSession().getAttribute("user") == null) {
-            httpResponse.sendRedirect("/cs122b-s24-team-sc/login-page.html");
+            httpResponse.sendRedirect("/cs122b_s24_team_sc_war/login-page.html");
         } else {
             // isEmployee attribute is set, user can access employee dashboard
             // if isEmployee attribute is not set, redirect to main-page.html
@@ -54,7 +54,7 @@ public class LoginFilter implements Filter {
                 chain.doFilter(request, response);
             } else {
                 if (httpRequest.getRequestURI().contains("/_dashboard")) {
-                    httpResponse.sendRedirect("/cs122b-s24-team-sc/main-page.html");
+                    httpResponse.sendRedirect("/cs122b_s24_team_sc_war/main-page.html");
                 } else {
                     chain.doFilter(request, response);
                 }
@@ -73,7 +73,7 @@ public class LoginFilter implements Filter {
 
     // Check if the requested URL is the entry point for employee login
     private boolean isEmployeeLoginEntryPoint(String requestURI) {
-        return requestURI.equals("/cs122b-s24-team-sc/_dashboard");
+        return requestURI.equals("/cs122b_s24_team_sc_war/_dashboard");
     }
 
     public void init(FilterConfig fConfig) {
