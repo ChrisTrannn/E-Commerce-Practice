@@ -1,17 +1,4 @@
 /*
- * CS 122B Project 4. Autocomplete Example.
- *
- * This Javascript code uses this library: https://github.com/devbridge/jQuery-Autocomplete
- *
- * This example implements the basic features of the autocomplete search, features that are
- *   not implemented are mostly marked as "TODO" in the codebase as a suggestion of how to implement them.
- *
- * To read this code, start from the line "$('#autocomplete').autocomplete" and follow the callback functions.
- *
- */
-
-
-/*
  * This function is called by the library when it needs to lookup a query.
  *
  * The parameter query is the query string.
@@ -107,9 +94,43 @@ $('#autocomplete').autocomplete({
 /*
  * do normal full text search if no suggestion is selected
  */
+function handleNormalSearchResult(resultDataString, formData) {
+    console.log("Received search result:", resultDataString);
+
+    if (resultDataString) {
+        try {
+            console.log("handle submission of search");
+
+            // If search results are returned, redirect the user to movie-list.html with form data
+            let queryString = $.param(formData);
+
+            window.location.href = "movie-list.html?" + queryString;
+        } catch (error) {
+            console.error("Error parsing JSON:", error);
+        }
+    } else {
+        console.log("No search results found");
+        $("#searchToastBody").text("No search results found.");
+        $("#searchToast").toast("show");
+
+    }
+}
+
 function handleNormalSearch(query) {
-    console.log("doing normal search with query: " + query);
-    // TODO: you should do normal search here
+    console.log("doing normal full text search with query: " + query);
+
+    let formData = {
+        title: $('#autocomplete').val()
+    };
+
+    $.ajax({
+        url: "api/movies",
+        method: "GET",
+        data: formData,
+        success: function(resultDataString) {
+            handleNormalSearchResult(resultDataString, formData);
+        }
+    });
 }
 
 // bind pressing enter key to a handler function
@@ -120,7 +141,3 @@ $('#autocomplete').keypress(function(event) {
         handleNormalSearch($('#autocomplete').val())
     }
 })
-
-// TODO: if you have a "search" button, you may want to bind the onClick event as well of that button
-
-

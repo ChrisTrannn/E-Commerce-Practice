@@ -16,7 +16,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Enumeration;
 
-// Declaring a WebServlet called StarsServlet, which maps to url "/api/movies"
+// Declaring a WebServlet called MoviesServlet, which maps to url "/api/movies"
 @WebServlet(name = "MoviesServlet", urlPatterns = "/api/movies")
 public class MoviesServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -107,7 +107,7 @@ public class MoviesServlet extends HttpServlet {
 
             // add filtering conditions
             if (title != null && !title.isEmpty()) {
-                query += " AND m.title LIKE ?";
+                query += " AND MATCH (m.title) AGAINST (? IN BOOLEAN MODE)";
             }
             if (year != null && !year.isEmpty()) {
                 query += " AND m.year = ?";
@@ -170,7 +170,12 @@ public class MoviesServlet extends HttpServlet {
 
             int parameterIndex = 1;
             if (title != null && !title.isEmpty()) {
-                statement.setString(parameterIndex++, "%" + title + "%");
+                // adds asterisk to the end and plus to front of every word to satisfy prefix boolean condition
+                StringBuilder titleBuilder = new StringBuilder();
+                for (String word: title.split(" ")) {
+                    titleBuilder.append("+").append(word).append("* ");
+                }
+                statement.setString(parameterIndex++, titleBuilder.toString());
             }
             if (year != null && !year.isEmpty()) {
                 statement.setInt(parameterIndex++, Integer.parseInt(year));
