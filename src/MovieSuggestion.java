@@ -1,5 +1,8 @@
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
+
+import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -8,103 +11,85 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-@WebServlet("/movie-suggestion")
-public class MovieSuggestion extends HttpServlet {
-    /*
-     * populate the Super hero hash map.
-     * Key is hero ID. Value is hero name.
-     */
-    public static HashMap<Integer, String> superHeroMap = new HashMap<>();
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
-    static {
-        superHeroMap.put(1, "Blade");
-        superHeroMap.put(2, "Ghost Rider");
-        superHeroMap.put(3, "Luke Cage");
-        superHeroMap.put(4, "Silver Surfer");
-        superHeroMap.put(5, "Beast");
-        superHeroMap.put(6, "Thing");
-        superHeroMap.put(7, "Black Panther");
-        superHeroMap.put(8, "Invisible Woman");
-        superHeroMap.put(9, "Nick Fury");
-        superHeroMap.put(10, "Storm");
-        superHeroMap.put(11, "Iron Man");
-        superHeroMap.put(12, "Professor X");
-        superHeroMap.put(13, "Hulk");
-        superHeroMap.put(14, "Cyclops");
-        superHeroMap.put(15, "Thor");
-        superHeroMap.put(16, "Jean Grey");
-        superHeroMap.put(17, "Wolverine");
-        superHeroMap.put(18, "Daredevil");
-        superHeroMap.put(19, "Captain America");
-        superHeroMap.put(20, "Spider-Man");
-        superHeroMap.put(101, "Superman");
-        superHeroMap.put(102, "Batman");
-        superHeroMap.put(103, "Wonder Woman");
-        superHeroMap.put(104, "Flash");
-        superHeroMap.put(105, "Green Lantern");
-        superHeroMap.put(106, "Catwoman");
-        superHeroMap.put(107, "Nightwing");
-        superHeroMap.put(108, "Captain Marvel");
-        superHeroMap.put(109, "Aquaman");
-        superHeroMap.put(110, "Green Arrow");
-        superHeroMap.put(111, "Martian Manhunter");
-        superHeroMap.put(112, "Batgirl");
-        superHeroMap.put(113, "Supergirl");
-        superHeroMap.put(114, "Black Canary");
-        superHeroMap.put(115, "Hawkgirl");
-        superHeroMap.put(116, "Cyborg");
-        superHeroMap.put(117, "Robin");
+@WebServlet(name = "MovieSuggestionServlet", urlPatterns = "/api/movie-suggestion")
+public class MovieSuggestion extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    private DataSource dataSource;
+
+    public void init(ServletConfig config) {
+        try {
+            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
     }
 
+
     /*
-     *
-     * Match the query against superheroes and return a JSON response.
-     *
-     * For example, if the query is "super":
-     * The JSON response look like this:
-     * [
-     * 	{ "value": "Superman", "data": { "heroID": 101 } },
-     * 	{ "value": "Supergirl", "data": { "heroID": 113 } }
-     * ]
-     *
-     * The format is like this because it can be directly used by the
-     *   JSON auto complete library this example is using. So that you don't have to convert the format.
-     *
      * The response contains a list of suggestions.
      * In each suggestion object, the "value" is the item string shown in the dropdown list,
      *   the "data" object can contain any additional information.
      *
-     *
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try {
-            // setup the response json arrray
+        response.setContentType("application/json");
+
+        String queryParam = request.getParameter("query");
+        String[] keywords = queryParam.split("\\s+");
+        StringBuilder searchTerms = new StringBuilder();
+
+        for (String keyword : keywords) {
+            searchTerms.append("+").append(keyword).append("* ").toString();
+        }
+
+        System.out.println(queryParam);
+        if (queryParam == null || queryParam.trim().isEmpty()) {
+            response.getWriter().write("[]");
+            return;
+        }
+
+        try (Connection connection = dataSource.getConnection()) {
+            String query = "SELECT id, title FROM movies WHERE MATCH(title) AGAINST(? IN BOOLEAN MODE) LIMIT 10;";
+            System.out.println(query);
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, searchTerms.toString().trim());
+
+            ResultSet resultSet = statement.executeQuery();
+            System.out.println(resultSet);
             JsonArray jsonArray = new JsonArray();
-
-            // get the query string from parameter
-            String query = request.getParameter("query");
-
-            // return the empty json array if query is null or empty
-            if (query == null || query.trim().isEmpty()) {
-                response.getWriter().write(jsonArray.toString());
-                return;
-            }
-
-            // search on superheroes and add the results to JSON Array
-            // this example only does a substring match
-            // TODO: in project 4, you should do full text search with MySQL to find the matches on movies and stars
-
-            for (Integer id : superHeroMap.keySet()) {
-                String heroName = superHeroMap.get(id);
-                if (heroName.toLowerCase().contains(query.toLowerCase())) {
-                    jsonArray.add(generateJsonObject(id, heroName));
-                }
+            while (resultSet.next()) {
+                String movieID = resultSet.getString("id");
+                String title = resultSet.getString("title");
+                System.out.println("movieID: " + movieID + ", title: " + title);
+                JsonObject jsonObject = generateJsonObject(movieID, title);
+                System.out.println(jsonObject);
+                jsonArray.add(jsonObject);
             }
             response.getWriter().write(jsonArray.toString());
+        } catch (SQLException sqle) {
+            System.err.println("SQL Error: " + sqle.getMessage());
+            sqle.printStackTrace();
         } catch (Exception e) {
-            System.out.println(e);
-            response.sendError(500, e.getMessage());
+            System.err.println("General Error: " + e.getMessage());
+            e.printStackTrace();
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("errorMessage", e.toString());
+            response.getWriter().write(jsonObject.toString());
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+
+        // search on superheroes and add the results to JSON Array
+        // this example only does a substring match
+        // TODO: in project 4, you should do full text search with MySQL to find the matches on movies and stars
+
+
     }
 
     /*
@@ -115,16 +100,22 @@ public class MovieSuggestion extends HttpServlet {
      * }
      *
      */
-    private static JsonObject generateJsonObject(Integer heroID, String heroName) {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("value", heroName);
+    private static JsonObject generateJsonObject(String movieID, String movieTitle) {
+        try {
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("value", movieTitle);
 
-        JsonObject additionalDataJsonObject = new JsonObject();
-        additionalDataJsonObject.addProperty("heroID", heroID);
+            JsonObject additionalDataJsonObject = new JsonObject();
+            additionalDataJsonObject.addProperty("movieID", movieID);
 
-        jsonObject.add("data", additionalDataJsonObject);
-        return jsonObject;
+            jsonObject.add("data", additionalDataJsonObject);
+            return jsonObject;
+        } catch (Exception e) {
+            System.err.println("Error generating JSON object: " + e.getMessage());
+            throw e;
+        }
     }
+
 
 
 }
