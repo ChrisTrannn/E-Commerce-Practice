@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Random;
+
 import org.jasypt.util.password.StrongPasswordEncryptor;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/api/login")
@@ -19,19 +21,28 @@ public class LoginServlet extends HttpServlet {
 
     // Create a dataSource which registered in web.
     private DataSource dataSource;
+    private DataSource masterDataSource;
+    private DataSource slaveDataSource;
+    private Random rand = new Random();
 
     public void init(ServletConfig config) {
         try {
-            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
+            masterDataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedbMaster");
+            slaveDataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
         } catch (NamingException e) {
             e.printStackTrace();
         }
     }
 
+    private DataSource getRandomDataSource() {
+        return rand.nextBoolean() ? masterDataSource : slaveDataSource;
+    }
     /**
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
      */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        dataSource = getRandomDataSource();
+
         // Verify reCAPTCHA
         String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
         try {

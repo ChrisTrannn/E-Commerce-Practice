@@ -14,6 +14,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Random;
 
 // Declaring a WebServlet called SingleMovieServlet, which maps to url "/api/single-movie"
 @WebServlet(name = "SingleMovieServlet", urlPatterns = "/api/single-movie")
@@ -22,13 +23,21 @@ public class SingleMovieServlet extends HttpServlet {
 
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
+    private DataSource masterDataSource;
+    private DataSource slaveDataSource;
+    private Random rand = new Random();
 
     public void init(ServletConfig config) {
         try {
-            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
+            masterDataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedbMaster");
+            slaveDataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
         } catch (NamingException e) {
             e.printStackTrace();
         }
+    }
+
+    private DataSource getRandomDataSource() {
+        return rand.nextBoolean() ? masterDataSource : slaveDataSource;
     }
 
     /**
@@ -36,6 +45,7 @@ public class SingleMovieServlet extends HttpServlet {
      * response)
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        dataSource = getRandomDataSource();
 
         response.setContentType("application/json"); // Response mime type
 

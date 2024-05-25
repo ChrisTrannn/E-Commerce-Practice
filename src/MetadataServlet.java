@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Random;
 
 // Declaring a WebServlet called MetadataServlet, which maps to url "/_dashboard/api/metadata"
 @WebServlet(name = "MetadataServlet", urlPatterns = "/_dashboard/api/metadata")
@@ -21,19 +22,29 @@ public class MetadataServlet extends HttpServlet {
 
     // Create a dataSource which registered in web.
     private DataSource dataSource;
+    private DataSource masterDataSource;
+    private DataSource slaveDataSource;
+    private Random rand = new Random();
 
     public void init(ServletConfig config) {
         try {
-            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
+            masterDataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedbMaster");
+            slaveDataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
         } catch (NamingException e) {
             e.printStackTrace();
         }
+    }
+
+    private DataSource getRandomDataSource() {
+        return rand.nextBoolean() ? masterDataSource : slaveDataSource;
     }
 
     /**
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        dataSource = getRandomDataSource();
+
         response.setContentType("application/json"); // Response mime type
 
         // Output stream to STDOUT

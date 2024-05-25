@@ -17,18 +17,28 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Random;
 
 @WebServlet(name = "MovieSuggestionServlet", urlPatterns = "/api/movie-suggestion")
 public class MovieSuggestion extends HttpServlet {
     private static final long serialVersionUID = 1L;
+
     private DataSource dataSource;
+    private DataSource masterDataSource;
+    private DataSource slaveDataSource;
+    private Random rand = new Random();
 
     public void init(ServletConfig config) {
         try {
-            dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
+            masterDataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedbMaster");
+            slaveDataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedb");
         } catch (NamingException e) {
             e.printStackTrace();
         }
+    }
+
+    private DataSource getRandomDataSource() {
+        return rand.nextBoolean() ? masterDataSource : slaveDataSource;
     }
 
 
@@ -39,6 +49,8 @@ public class MovieSuggestion extends HttpServlet {
      *
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        dataSource = getRandomDataSource();
+
         response.setContentType("application/json");
 
         String queryParam = request.getParameter("query");
@@ -93,10 +105,10 @@ public class MovieSuggestion extends HttpServlet {
     }
 
     /*
-     * Generate the JSON Object from hero to be like this format:
+     * Generate the JSON Object from movies to be like this format:
      * {
-     *   "value": "Iron Man",
-     *   "data": { "heroID": 11 }
+     *   "value": "Movie Ex",
+     *   "data": { "movieID": 11 }
      * }
      *
      */
