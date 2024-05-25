@@ -1,29 +1,80 @@
 - # General
-    - #### Team#:
+    - #### Team#: 35 (team-sc)
     
-    - #### Names:
+    - #### Names: Chris Tran and Subin Kim
     
-    - #### Project 5 Video Demo Link:
-
-    - #### Instruction of deployment:
+    - #### Project 5 Video Demo Link: 
 
     - #### Collaborations and Work Distribution:
 
 
 - # Connection Pooling
     - #### Include the filename/path of all code/configuration files in GitHub of using JDBC Connection Pooling.
+        - Configuration:
+            - [WebContent/META-INF/context.xml](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/WebContent/META-INF/context.xml)
+        - Servlets/Code:
+            - [src/AddMovieServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/AddMovieServlet.java)
+            - [src/AddStarServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/AddStarServlet.java)
+            - [src/EmployeeLoginServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/EmployeeLoginServlet.java)
+            - [src/GenreServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/GenreServlet.java)
+            - [src/LoginServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/LoginServlet.java)
+            - [src/MetadataServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/MetadataServlet.java)
+            - [src/MovieSuggestion.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/MovieSuggestion.java)
+            - [src/MoviesServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/MoviesServlet.java)
+            - [src/PaymentServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/PaymentServlet.java)
+            - [src/ShoppingCartServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/ShoppingCartServlet.java)
+            - [src/SingleMovieServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/SingleMovieServlet.java)
+            - [src/SingleStarServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/SingleStarServlet.java)
     
     - #### Explain how Connection Pooling is utilized in the Fabflix code.
+        - Connection pooling is utilized in the Fabflix code by configuring the two DataSources to manage a pool
+    of database connections. This allows for reuse of connections, which reduces overhead for every request
+    and increases efficiency. There are two DataSources configure with connection pooling: one for the local database residing
+    on the current instance, and one for the master database residing on the master instance (for write requests). The Connection Pooling
+    configurations are in the context.xml file.
     
     - #### Explain how Connection Pooling works with two backend SQL.
-    
+        - Each backend database has their own DataSource configuration. In the context.xml file, there are two DataSources set up:
+    one for database that resides on the current instance, and one for database that resides on the master instance. Each DataSources
+    manages their own pool of connections. This greatly increases efficiency because both databases can handle many concurrent operations.
+    There are two DataSources because all write requests are sent to the master database regardless, and all read requests
+    can be directed to any database.
+        
 
 - # Master/Slave
     - #### Include the filename/path of all code/configuration files in GitHub of routing queries to Master/Slave SQL.
+        - Configuration:
+            - [WebContent/META-INF/context.xml](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/WebContent/META-INF/context.xml)
+            - AWS Instance 1 Config:
+                - /etc/apache2/sites-enabled/000-default.conf 
+        - Servlets/Code:
+            - [src/AddMovieServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/AddMovieServlet.java)
+            - [src/AddStarServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/AddStarServlet.java)
+            - [src/EmployeeLoginServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/EmployeeLoginServlet.java)
+            - [src/GenreServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/GenreServlet.java)
+            - [src/LoginServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/LoginServlet.java)
+            - [src/MetadataServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/MetadataServlet.java)
+            - [src/MovieSuggestion.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/MovieSuggestion.java)
+            - [src/MoviesServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/MoviesServlet.java)
+            - [src/PaymentServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/PaymentServlet.java)
+            - [src/ShoppingCartServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/ShoppingCartServlet.java)
+            - [src/SingleMovieServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/SingleMovieServlet.java)
+            - [src/SingleStarServlet.java](https://github.com/UCI-Chenli-teaching/cs122b-s24-team-sc/blob/21c7716134a845df1e0e9949524b6e5f54096c12/src/SingleStarServlet.java)
 
     - #### How read/write requests were routed to Master/Slave SQL?
-    - 
-    
+        - We routed write requests to the Master's SQL, but for read requests we routed them to either the Master or Slave SQL. We did this by adding an additional Data Source to the context.xml file and then in all the servlets that make write requests we only initialized and used the Master datasource to ensure that Master handled these writes. As for the servlets that only handle read requests, we initialized both the Master and Slave Data Sources and then randomly assigned these read servlets one of the two.
+        - Additionally, we had to make sure that we created a new SQL user on the aws Instance 2 (Master) that is able to connect to the SQL server from Master's private IP Address
+            - CREATE USER 'primary'@'masterPrivateIP' IDENTIFIED BY 'password';
+            - GRANT ALL PRIVILEGES ON moviedb.* TO 'primary'@'masterPrivateIP';
+
+
+
+
+
+
+
+
+-----------------Future Project 5----------------------------------    
 
 - # JMeter TS/TJ Time Logs
     - #### Instructions of how to use the `log_processing.*` script to process the JMeter logs.
@@ -43,6 +94,14 @@
 | Case 1: HTTP/1 thread                          | ![](path to image in img/)   | ??                         | ??                                  | ??                        | ??           |
 | Case 2: HTTP/10 threads                        | ![](path to image in img/)   | ??                         | ??                                  | ??                        | ??           |
 | Case 3: HTTP/10 threads/No connection pooling  | ![](path to image in img/)   | ??                         | ??                                  | ??                        | ??           |
+
+
+
+
+
+
+-------old below (Project 3)------------------
+
 
 
 # team-sc
