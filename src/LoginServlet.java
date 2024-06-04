@@ -61,9 +61,10 @@ public class LoginServlet extends HttpServlet {
         // check if the username and password, match email and password column from customers table
         try (Connection conn = dataSource.getConnection()) {
             // query the customers table and check if the username and password match
-            String query = "SELECT * from customers where email = ?";
+            String query = "SELECT * from customers where email = ? and password = ?";
             PreparedStatement statement = conn.prepareStatement(query);
             statement.setString(1, username);
+            statement.setString(2, password);
             ResultSet rs = statement.executeQuery();
 
             // iterate through the result set and check if the username and password match
@@ -71,11 +72,8 @@ public class LoginServlet extends HttpServlet {
                 String email = rs.getString("email");
                 String passwd = rs.getString("password");
 
-                // Decrypt the password and check if it matches the input password
-                boolean decryptedPasswordBool = new StrongPasswordEncryptor().checkPassword(password, passwd);
-
                 // Login success if there's a match
-                if (email.equals(username) && decryptedPasswordBool) {
+                if (email.equals(username) && passwd.equals(password)) {
                     // set this user into the session, set customerId into session as well
                     request.getSession().setAttribute("user", new User(username));
                     request.getSession().setAttribute("customerId", rs.getString("id"));
